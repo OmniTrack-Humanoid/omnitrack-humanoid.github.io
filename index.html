@@ -3,15 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UniAct: Unified Motion Generation</title>
+    <title>OmniTrack: General Motion Tracking via Physics-Consistent Reference</title>
     <style>
-        /* --- Reset and Base Styles --- */
         :root {
-            --primary-blue: #3b82f6;
-            --dark-bg: #020617;
-            --card-bg: #1e293b;
-            --text-light: #f8fafc;
-            --text-gray: #94a3b8;
+            --bg: #f5fbff;
+            --bg-soft: #eaf5fb;
+            --panel: rgba(255, 255, 255, 0.92);
+            --panel-border: rgba(27, 109, 148, 0.18);
+            --text: #163142;
+            --text-dim: #456378;
+            --accent: #2c8dca;
+            --accent-2: #ff9e57;
+            --intro-delay: 1.5s;
         }
 
         * {
@@ -21,114 +24,168 @@
         }
 
         html {
-            scroll-behavior: smooth;
+            scroll-behavior: auto;
         }
 
         body {
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--dark-bg);
-            color: var(--text-light);
-            overflow-x: hidden;
+            font-family: "Space Grotesk", "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+            color: var(--text);
+            background:
+                radial-gradient(1200px 600px at 10% -10%, rgba(126, 219, 255, 0.4), transparent 60%),
+                radial-gradient(900px 500px at 90% 0%, rgba(255, 215, 174, 0.42), transparent 58%),
+                linear-gradient(180deg, var(--bg) 0%, #eef7fc 100%);
             line-height: 1.6;
+            overflow-x: hidden;
         }
 
-        /* --- Section 1: Hero / Landing --- */
-        .hero-section {
+        .hero {
             position: relative;
-            width: 100%;
-            /* CHANGED: min-height allows the section to grow if the embedded content is tall */
-            min-height: 100vh; 
+            min-height: 100vh;
             display: flex;
-            flex-direction: column;
-            justify-content: center;
             align-items: center;
-            text-align: center;
+            padding: 110px 20px 60px;
             overflow: hidden;
-            /* Added padding to prevent content touching edges on smaller screens */
-            padding: 120px 0 60px 0; 
+            text-align: center;
         }
 
-        /* Video Background */
-        .video-bg-container {
+        .hero-bg {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-            background-color: black;
+            inset: 0;
+            z-index: -2;
+            overflow: hidden;
         }
 
-        .video-bg {
+        .hero-bg video {
             width: 100%;
             height: 100%;
             object-fit: cover;
-            opacity: 0.5;
+            opacity: 1;
+            filter: saturate(1.1) contrast(1.05);
+            animation: videoDim 1.2s ease-out forwards;
+            animation-delay: var(--intro-delay);
         }
 
-        /* Hero Content */
-        .hero-content {
-            position: relative;
-            z-index: 10;
-            padding: 0 40px;
-            max-width: 1200px;
-            width: 100%;
-            animation: slideUp 1.2s ease-out;
+        .hero-overlay {
+            position: absolute;
+            inset: 0;
+            z-index: -1;
+            background:
+                linear-gradient(180deg, rgba(245, 251, 255, 0.02) 0%, rgba(245, 251, 255, 0.45) 58%, rgba(238, 247, 252, 0.72) 100%);
+            opacity: 0;
+            animation: overlayIn 1.2s ease-out forwards;
+            animation-delay: var(--intro-delay);
+        }
+
+        .hero-inner {
+            width: min(1400px, 100%);
+            margin: 0 auto;
             display: flex;
-            flex-direction: column;
-            align-items: center;
+            justify-content: center;
+            align-items: start;
         }
 
         h1 {
-            font-size: clamp(2rem, 4vw, 3.5rem); 
-            font-weight: 800;
-            margin-bottom: 25px;
-            text-shadow: 0 4px 10px rgba(0,0,0,0.8);
-            line-height: 1.2;
-            letter-spacing: -0.02em;
+            font-size: clamp(2.7rem, 4.1vw, 4.6rem);
+            line-height: 1.12;
+            letter-spacing: -0.01em;
+            margin-bottom: 18px;
+            color: #0f2d40;
+            margin-left: auto;
+            margin-right: auto;
+            max-width: 1300px;
         }
 
-        /* NEW: Link Buttons Styles */
-        .links-container {
+        .title-line-fixed {
+            white-space: nowrap;
+        }
+
+        .brand-word {
+            font-family: "Avenir Next", "Montserrat", "Segoe UI", sans-serif;
+            font-weight: 900;
+            font-size: 1.08em;
+            letter-spacing: 0.03em;
+            line-height: 1;
+            background: linear-gradient(135deg, #1f7ab1 0%, #3f8cff 45%, #7a5cff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 3px 14px rgba(82, 112, 255, 0.34);
+            vertical-align: baseline;
+        }
+
+        .brand-inline {
+            font-weight: 800;
+            background: linear-gradient(135deg, #1f7ab1 0%, #3f8cff 45%, #7a5cff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 2px 10px rgba(82, 112, 255, 0.28);
+        }
+
+        .headline-sub {
+            color: var(--text-dim);
+            max-width: 880px;
+            margin-bottom: 28px;
+            font-size: clamp(1rem, 1.4vw, 1.15rem);
+        }
+
+        .action-row {
             display: flex;
-            gap: 16px;
             justify-content: center;
             flex-wrap: wrap;
-            margin-bottom: 30px;
+            gap: 12px;
+            margin-bottom: 24px;
+            margin-top: 16px;
         }
 
-        .link-btn {
+        .btn {
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            padding: 10px 24px;
-            background: rgba(30, 41, 59, 0.6);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 999px;
-            color: #fff;
             text-decoration: none;
+            border-radius: 999px;
+            padding: 12px 22px;
+            font-size: 1.03rem;
             font-weight: 600;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-            backdrop-filter: blur(4px);
+            transition: 0.25s ease;
+            border: 1px solid transparent;
         }
 
-        .link-btn:hover {
-            background: rgba(59, 130, 246, 0.2); /* Tint with primary blue */
-            border-color: var(--primary-blue);
+        .btn-ghost {
+            color: #24516a;
+            background: rgba(255, 255, 255, 0.86);
+            border-color: rgba(36, 94, 124, 0.2);
+        }
+
+        .btn-ghost:hover {
+            background: linear-gradient(135deg, #3f9bd5 0%, #2c8dca 100%);
+            border-color: #2c8dca;
+            color: #ffffff;
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+            box-shadow: 0 10px 22px rgba(44, 141, 202, 0.25);
         }
 
-        .link-btn svg {
+        .btn svg {
             width: 20px;
             height: 20px;
         }
 
-        /* Author Information Styles */
+        .hero-note {
+            color: #5b778a;
+            font-size: 0.92rem;
+        }
+
+        .hero-main {
+            max-width: 1300px;
+            opacity: 0;
+            transform: translateY(16px);
+            animation: heroReveal 0.9s ease-out forwards;
+            animation-delay: var(--intro-delay);
+        }
+
         .authors-section {
             margin-bottom: 8px;
             max-width: 1100px;
+            margin-left: auto;
+            margin-right: auto;
         }
 
         .authors-row {
@@ -141,763 +198,884 @@
         }
 
         .author-name {
-            font-size: 0.95rem;
-            color: #e2e8f0;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+            font-size: 1.08rem;
+            color: #2f5368;
         }
 
         .author-name sup {
             font-size: 0.6rem;
-            color: var(--primary-blue);
+            color: var(--accent);
         }
 
         .equal-contrib {
-            color: #fbbf24;
+            color: #e28743;
         }
 
         .affiliations-section {
             margin-bottom: 8px;
             max-width: 1100px;
+            margin-left: auto;
+            margin-right: auto;
         }
 
         .affiliation-row {
             display: flex;
             justify-content: center;
             flex-wrap: wrap;
-            gap: 1px 16px;
+            gap: 2px 16px;
             margin-bottom: 1px;
-            line-height: 1.3;
+            line-height: 1.4;
         }
 
         .affiliation {
-            font-size: 0.75rem;
-            color: #94a3b8;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.6);
+            font-size: 0.9rem;
+            color: #5b778a;
         }
 
         .affiliation sup {
-            font-size: 0.55rem;
-            color: var(--primary-blue);
+            font-size: 0.56rem;
+            color: var(--accent);
         }
 
         .contact-info {
-            font-size: 0.8rem;
-            color: #94a3b8;
-            margin-bottom: 6px;
+            font-size: 0.95rem;
+            color: #607f91;
+            margin-bottom: 12px;
         }
 
         .contact-info .equal-note {
             margin-right: 16px;
         }
 
-        .project-link {
-            font-size: 0.95rem;
-            margin-bottom: 18px;
-        }
-
-        .project-link a {
-            color: var(--primary-blue);
-            text-decoration: none;
-            font-weight: 500;
-        }
-
-        .project-link a:hover {
-            text-decoration: underline;
-        }
-
-        .hero-description {
-            font-size: 1.25rem;
-            color: #e2e8f0;
-            max-width: 800px;
-            margin-bottom: 30px;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
-            font-weight: 400;
-        }
-
-        /* Abstract Section Styles */
-        .abstract-section {
-            max-width: 1000px;
-            margin-bottom: 35px;
-            width: 100%;
-        }
-
-        .abstract-card {
-            background: linear-gradient(135deg, rgba(30, 41, 59, 0.7), rgba(15, 23, 42, 0.8));
-            border: 1px solid rgba(255, 255, 255, 0.1);
+        .hero-panel {
+            background: var(--panel);
+            border: 1px solid var(--panel-border);
             border-radius: 20px;
-            padding: 30px 35px;
-            backdrop-filter: blur(20px);
-            position: relative;
-            overflow: hidden;
+            padding: 24px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 14px 30px rgba(40, 102, 136, 0.12);
         }
 
-        .abstract-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.5), transparent);
-        }
-
-        .abstract-card::after {
-            content: '';
-            position: absolute;
-            top: -50%;
-            right: -50%;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(circle, rgba(59, 130, 246, 0.08) 0%, transparent 60%);
-            pointer-events: none;
-        }
-
-        .abstract-header {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 16px;
-        }
-
-        .abstract-label {
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: var(--primary-blue);
+        .hero-panel h2 {
+            font-size: 1.05rem;
+            margin-bottom: 12px;
+            color: #24516a;
+            letter-spacing: 0.03em;
             text-transform: uppercase;
-            letter-spacing: 2px;
         }
 
-        .abstract-text {
+        .hero-panel p {
+            color: var(--text-dim);
             font-size: 0.95rem;
-            color: #cbd5e1;
-            line-height: 1.7;
-            margin-bottom: 15px;
-            position: relative;
-            z-index: 1;
-            text-align: justify;
         }
 
-        .abstract-text strong {
-            color: #fff;
-            font-weight: 600;
-        }
-
-        .abstract-text .highlight {
-            color: #60a5fa;
-            font-weight: 500;
-        }
-
-        /* NEW: Dataset Embed Styles */
-        .dataset-wrapper {
-            width: 100%;
-            max-width: 1000px;
-            height: 500px; /* Adjust height based on dataset.html content */
-            background: rgba(30, 41, 59, 0.4);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: 16px;
-            backdrop-filter: blur(5px);
-            margin-bottom: 40px;
-            overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        }
-
-        .dataset-iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-        }
-
-        .download-btn {
-            display: inline-block;
-            padding: 16px 36px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: white;
-            background: linear-gradient(135deg, var(--primary-blue) 0%, #2563eb 100%);
-            border: 1px solid rgba(255,255,255,0.2);
-            border-radius: 50px;
-            text-decoration: none;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.5);
-            backdrop-filter: blur(5px);
-        }
-
-        .download-btn:hover {
-            transform: translateY(-3px) scale(1.02);
-            box-shadow: 0 20px 30px -10px rgba(37, 99, 235, 0.7);
-            background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
-        }
-
-        .scroll-indicator {
-            position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 10;
-            animation: bounce 2s infinite;
-            opacity: 0.7;
-            cursor: pointer;
-        }
-
-        /* --- Section 2: Method Embed --- */
-        .method-section {
-            width: 100%;
-            min-height: auto;
-            background: linear-gradient(to bottom, var(--dark-bg), #0f172a);
+        .tag-grid {
+            margin-top: 16px;
             display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 80px 20px;
+            flex-wrap: wrap;
+            gap: 8px;
         }
 
-        .section-header {
-            margin-bottom: 40px;
+        .tag {
+            font-size: 0.78rem;
+            padding: 6px 10px;
+            border-radius: 8px;
+            border: 1px solid rgba(49, 114, 145, 0.16);
+            background: rgba(255, 255, 255, 0.8);
+            color: #3c6378;
+        }
+
+        .section {
+            width: min(1180px, calc(100% - 40px));
+            margin: 0 auto;
+            padding: 70px 0;
+        }
+
+        .section-head {
+            margin-bottom: 22px;
             text-align: center;
         }
 
         .section-title {
-            font-size: 3rem;
-            font-weight: 700;
-            background: linear-gradient(to right, #fff, #94a3b8);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 10px;
+            font-size: clamp(1.6rem, 3vw, 2.4rem);
+            margin-bottom: 6px;
         }
 
-        .section-subtitle {
-            color: var(--primary-blue);
-            font-size: 1.2rem;
-            font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 2px;
+        .section-sub {
+            color: var(--text-dim);
         }
 
-        .iframe-wrapper {
+        .overview-card {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.96), rgba(242, 249, 254, 0.94));
+            border: 1px solid rgba(27, 109, 148, 0.16);
+            border-radius: 20px;
+            padding: 26px;
+            color: #456378;
+        }
+
+        .overview-card strong {
+            color: #17364a;
+        }
+
+        .frame-wrap {
+            margin-top: 24px;
+            border-radius: 18px;
+            overflow: hidden;
+            border: 1px solid rgba(27, 109, 148, 0.14);
+            background: rgba(255, 255, 255, 0.88);
+            box-shadow: 0 12px 26px rgba(36, 100, 133, 0.12);
+        }
+
+        .frame-wrap iframe {
             width: 100%;
-            max-width: 1600px;
+            border: none;
+            display: block;
+        }
+
+        .method-frame {
+            min-height: 680px;
+            height: auto;
+        }
+
+        #method .frame-wrap {
+            margin-top: 24px;
+            border: none;
+            border-radius: 0;
             background: transparent;
-            border: none;
             box-shadow: none;
-            position: relative;
-            height: 850px;
-            overflow: hidden;
-            margin-bottom: 40px;
+            overflow: visible;
         }
 
-        iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-            overflow: hidden;
+        #method .frame-wrap iframe {
+            display: block;
         }
 
-        .method-description {
-            max-width: 1000px;
-            text-align: justify;
-            color: var(--text-gray);
-            font-size: 1.1rem;
-            line-height: 1.8;
-            background: rgba(30, 41, 59, 0.3);
-            padding: 30px;
-            border-radius: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        /* --- Section 3: Enhanced Gallery --- */
-        .gallery-section {
-            width: 100%;
-            background: linear-gradient(180deg, #0f172a 0%, #020617 50%, #0f172a 100%);
-            padding: 100px 40px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .gallery-section::before {
-            content: '';
-            position: absolute;
-            top: 20%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 800px;
-            height: 800px;
-            background: radial-gradient(circle, rgba(59, 130, 246, 0.12) 0%, rgba(0,0,0,0) 60%);
-            z-index: 0;
-            pointer-events: none;
-        }
-
-        .gallery-section::after {
-            content: '';
-            position: absolute;
-            bottom: 10%;
-            right: 10%;
-            width: 500px;
-            height: 500px;
-            background: radial-gradient(circle, rgba(139, 92, 246, 0.1) 0%, rgba(0,0,0,0) 60%);
-            z-index: 0;
-            pointer-events: none;
-        }
-
-        .gallery-container {
-            max-width: 1400px;
-            margin: 0 auto;
-            position: relative;
-            z-index: 1;
-        }
-
-        /* Bento Grid Layout */
-        .video-grid {
+        .gallery {
             display: grid;
             grid-template-columns: repeat(6, 1fr);
-            grid-template-rows: auto;
-            gap: 24px;
+            gap: 18px;
+            margin-top: 24px;
         }
 
-        .video-card {
-            background: linear-gradient(145deg, rgba(30, 41, 59, 0.8), rgba(15, 23, 42, 0.9));
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 24px;
-            overflow: hidden;
-            backdrop-filter: blur(20px);
-            transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
-            display: flex;
-            flex-direction: column;
+        .video-carousel {
             position: relative;
+            margin-top: 16px;
+            padding: 0 30px;
         }
 
-        .video-card::before {
-            content: '';
+        .carousel-btn {
             position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 38px;
+            height: 38px;
+            border-radius: 999px;
+            border: 1px solid rgba(27, 109, 148, 0.22);
+            background: rgba(255, 255, 255, 0.92);
+            color: #24516a;
+            font-size: 1.1rem;
+            line-height: 1;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 3;
+            transition: 0.2s ease;
+            box-shadow: 0 8px 16px rgba(36, 100, 133, 0.14);
+        }
+
+        .carousel-btn:hover {
+            background: #2c8dca;
+            color: #fff;
+            border-color: #2c8dca;
+        }
+
+        .carousel-btn.prev { left: -14px; }
+        .carousel-btn.next { right: -14px; }
+
+        .carousel-viewport {
+            overflow: visible;
+            border-radius: 16px;
+            position: relative;
+            min-height: 520px;
+        }
+
+        .carousel-track {
+            position: relative;
+            height: 520px;
+        }
+
+        .results-group {
+            margin-top: 32px;
+        }
+
+        .results-group:first-of-type {
+            margin-top: 0;
+        }
+
+        .results-group-title {
+            font-size: clamp(1.15rem, 2.1vw, 1.6rem);
+            text-align: center;
+            color: #1c4a63;
+            margin-bottom: 6px;
+        }
+
+        .results-group-note {
+            text-align: center;
+            color: #4f6f82;
+            font-size: 0.98rem;
+            margin-top: -2px;
+            margin-bottom: 10px;
+        }
+
+        .card {
+            grid-column: span 2;
+            background: linear-gradient(155deg, rgba(255, 255, 255, 0.94), rgba(243, 250, 254, 0.95));
+            border: 1px solid rgba(27, 109, 148, 0.12);
+            border-radius: 16px;
+            overflow: hidden;
+            transition: transform 0.5s ease, opacity 0.5s ease, border-color 0.25s ease;
+            position: absolute;
+            left: 50%;
             top: 0;
-            left: 0;
-            right: 0;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            width: min(720px, 84vw);
+            transform-origin: center center;
+            opacity: 0;
+            pointer-events: none;
+            box-shadow: 0 10px 22px rgba(36, 100, 133, 0.14);
+        }
+
+        .video-carousel .card.is-active {
+            transform: translateX(-50%) scale(1);
+            opacity: 1;
+            z-index: 4;
+            pointer-events: auto;
+        }
+
+        .video-carousel .card.is-prev {
+            transform: translateX(-76%) scale(0.94);
+            opacity: 0.78;
+            z-index: 3;
+        }
+
+        .video-carousel .card.is-next {
+            transform: translateX(-24%) scale(0.94);
+            opacity: 0.78;
+            z-index: 3;
+        }
+
+        .video-carousel .card.is-prev2 {
+            transform: translateX(-90%) scale(0.88);
+            opacity: 0.52;
+            z-index: 2;
+        }
+
+        .video-carousel .card.is-next2 {
+            transform: translateX(-10%) scale(0.88);
+            opacity: 0.52;
+            z-index: 2;
+        }
+
+        .video-carousel .card.is-hidden {
+            transform: translateX(-50%) scale(0.74);
+            opacity: 0;
             z-index: 1;
         }
 
-        .video-card:hover {
-            transform: translateY(-8px) scale(1.02);
-            box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.6),
-                        0 0 40px -10px rgba(59, 130, 246, 0.3);
-            border-color: rgba(59, 130, 246, 0.4);
-        }
-
-        /* Card sizes for bento layout */
-        .video-card.large {
-            grid-column: span 4;
-            grid-row: span 2;
-        }
-
-        .video-card.medium {
-            grid-column: span 2;
-            grid-row: span 1;
-        }
-
-        .video-card.wide {
-            grid-column: span 3;
-            grid-row: span 1;
-        }
-
-        .video-wrapper {
-            position: relative;
+        .card video {
             width: 100%;
-            padding-top: 56.25%; /* 16:9 aspect ratio */
-            background: linear-gradient(135deg, #0a0a0a, #1a1a2e);
+            aspect-ratio: 16/9;
+            background: #f1f8fc;
+        }
+
+        .card-body {
+            padding: 12px 14px 14px;
+        }
+
+        .card h3 {
+            font-size: 0.98rem;
+            margin-bottom: 0;
+            text-align: center;
+        }
+
+        .card p {
+            color: var(--text-dim);
+            font-size: 0.84rem;
+        }
+
+        .feature-video {
+            margin-top: 18px;
+            background: linear-gradient(155deg, rgba(255, 255, 255, 0.94), rgba(243, 250, 254, 0.95));
+            border: 1px solid rgba(27, 109, 148, 0.12);
+            border-radius: 16px;
             overflow: hidden;
+            box-shadow: 0 8px 18px rgba(36, 100, 133, 0.1);
         }
 
-        .video-wrapper video {
-            position: absolute;
-            top: 0;
-            left: 0;
+        .feature-video video {
             width: 100%;
-            height: 100%;
-            object-fit: contain;
-        }
-
-        .card-content {
-            padding: 24px 28px;
-            position: relative;
-            z-index: 2;
-            background: linear-gradient(to top, rgba(15, 23, 42, 0.95), rgba(15, 23, 42, 0.7));
-        }
-
-        .card-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 6px 14px;
-            background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
-            border: 1px solid rgba(59, 130, 246, 0.3);
-            border-radius: 50px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            color: #60a5fa;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 12px;
-        }
-
-        .card-badge svg {
-            width: 14px;
-            height: 14px;
-        }
-
-        .card-title {
-            font-size: 1.4rem;
-            font-weight: 700;
-            color: white;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            line-height: 1.3;
-        }
-
-        .card-title::before {
-            content: '';
+            aspect-ratio: 16/9;
             display: block;
-            width: 4px;
-            height: 24px;
-            background: linear-gradient(180deg, #3b82f6, #8b5cf6);
-            border-radius: 2px;
-            flex-shrink: 0;
+            background: #f1f8fc;
         }
 
-        .card-desc {
-            color: #94a3b8;
-            font-size: 0.95rem;
-            line-height: 1.6;
+        .feature-body {
+            padding: 14px 14px 16px;
         }
 
-        /* Card number indicator */
-        .card-number {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            font-size: 4rem;
-            font-weight: 800;
-            color: rgba(255, 255, 255, 0.03);
-            line-height: 1;
-            z-index: 0;
+        .feature-body h3 {
+            font-size: 1.08rem;
+            margin-bottom: 4px;
         }
 
-        .video-card.large .card-number {
-            font-size: 6rem;
+        .feature-body p {
+            color: var(--text-dim);
+            font-size: 0.92rem;
         }
 
-        @media (max-width: 1200px) {
-            .video-grid {
-                grid-template-columns: repeat(2, 1fr);
+        .footer {
+            width: min(1180px, calc(100% - 40px));
+            margin: 8px auto 30px;
+            padding-top: 12px;
+            border-top: 1px solid rgba(122, 213, 255, 0.22);
+            color: #648495;
+            font-size: 0.9rem;
+        }
+
+        @keyframes heroReveal {
+            from {
+                opacity: 0;
+                transform: translateY(16px);
             }
-            .video-card.large,
-            .video-card.medium,
-            .video-card.wide {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes videoDim {
+            from {
+                opacity: 1;
+            }
+            to {
+                opacity: 0.3;
+            }
+        }
+
+        @keyframes overlayIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .hero-main {
+                opacity: 1;
+                transform: none;
+                animation: none;
+            }
+
+            .hero-bg video {
+                animation: none;
+                opacity: 0.3;
+            }
+
+            .hero-overlay {
+                animation: none;
+                opacity: 1;
+            }
+        }
+
+        @media (max-width: 1080px) {
+            .method-frame {
+                min-height: 720px;
+            }
+
+            .card,
+            .card.large {
                 grid-column: span 1;
-                grid-row: span 1;
+            }
+
+            .title-line-fixed {
+                white-space: normal;
             }
         }
 
-        @media (max-width: 768px) {
-            .video-grid {
-                grid-template-columns: 1fr;
-                gap: 20px;
+        @media (max-width: 720px) {
+            .hero {
+                padding-top: 90px;
             }
-            .gallery-section {
-                padding: 60px 20px;
+
+            .card {
+                width: min(620px, 96vw);
             }
-        }
 
-        .card-desc {
-            color: var(--text-gray);
-            font-size: 0.95rem;
-        }
+            .carousel-viewport {
+                min-height: 450px;
+            }
 
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(40px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+            .carousel-track {
+                height: 450px;
+            }
 
-        @keyframes bounce {
-            0%, 20%, 50%, 80%, 100% { transform: translate(-50%, 0); }
-            40% { transform: translate(-50%, -10px); }
-            60% { transform: translate(-50%, -5px); }
-        }
+            .video-carousel .card.is-prev {
+                transform: translateX(-80%) scale(0.9);
+            }
 
-        @media (max-width: 1024px) {
-            h1 { font-size: 2.5rem; }
-        }
+            .video-carousel .card.is-next {
+                transform: translateX(-20%) scale(0.9);
+            }
 
-        @media (max-width: 768px) {
-            .hero-content { padding: 0 20px; }
-            .section-title { font-size: 2.2rem; }
-            .hero-description { font-size: 1.1rem; }
-            .method-description { text-align: left; padding: 20px; }
-            .dataset-wrapper { height: 350px; } /* Smaller height for mobile */
+            .carousel-btn {
+                width: 34px;
+                height: 34px;
+            }
+
+            .carousel-btn.prev { left: -6px; }
+            .carousel-btn.next { right: -6px; }
+
+            .method-frame {
+                min-height: 620px;
+            }
         }
     </style>
 </head>
 <body>
-
-    <!-- Section 1: Hero -->
-    <section class="hero-section">
-        <div class="video-bg-container">
-            <!-- Added preload="auto" to prioritize loading -->
-            <video class="video-bg" autoplay muted loop playsinline preload="auto">
-                <source src="text_title.mp4" type="video/mp4">
+    <section class="hero">
+        <div class="hero-bg">
+            <video autoplay muted loop playsinline preload="auto">
+                <source src="videos/hero/hero_bg.mp4" type="video/mp4">
             </video>
-            <div style="position:absolute; top:0; left:0; width:100%; height:100%; background: radial-gradient(circle, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.7) 100%);"></div>
         </div>
+        <div class="hero-overlay"></div>
 
-        <div class="hero-content">
-            <h1>UniAct: Unified Motion Generation and Action Streaming for Humanoid Robots</h1>
-
-            <!-- Author Information -->
-            <div class="authors-section">
-                <div class="authors-row">
-                    <span class="author-name">Nan Jiang<sup>1,2,3,9,11<span class="equal-contrib">*</span></sup></span>
-                    <span class="author-name">Zimo He<sup>4,2,9,11<span class="equal-contrib">*</span></sup></span>
-                    <span class="author-name">Wanhe Yu<sup>1,3,5,9,11</sup></span>
-                    <span class="author-name">Lexi Pang<sup>1,3,5,9,11</sup></span>
-                    <span class="author-name">Yunhao Li<sup>6,3,9,11</sup></span>
-                    <span class="author-name">Hongjie Li<sup>7,3,9,11</sup></span>
-                </div>
-                <div class="authors-row">
-                    <span class="author-name">Jieming Cui<sup>1,2,3,9,11</sup></span>
-                    <span class="author-name">Yuhan Li<sup>8,2</sup></span>
-                    <span class="author-name">Yizhou Wang<sup>4,9,10</sup></span>
-                    <span class="author-name">Yixin Zhu<sup>3,1,9,11,12</sup>✉</span>
-                    <span class="author-name">Siyuan Huang<sup>2,9</sup>✉</span>
-                </div>
-            </div>
-
-            <div class="affiliations-section">
-                <div class="affiliation-row">
-                    <span class="affiliation"><sup>1</sup> Institute for AI, Peking University</span>
-                    <span class="affiliation"><sup>2</sup> Beijing Institute for General Artificial Intelligence (BIGAI)</span>
-                    <span class="affiliation"><sup>3</sup> School of Psychological and Cognitive Sciences, Peking University</span>
-                </div>
-                <div class="affiliation-row">
-                    <span class="affiliation"><sup>4</sup> School of Computer Science, Peking University</span>
-                    <span class="affiliation"><sup>5</sup> Yuanpei College, Peking University</span>
-                    <span class="affiliation"><sup>6</sup> School of Foreign Languages, Peking University</span>
-                    <span class="affiliation"><sup>7</sup> School of EECS, Peking University</span>
-                </div>
-                <div class="affiliation-row">
-                    <span class="affiliation"><sup>8</sup> Huazhong University of Science and Technology</span>
-                    <span class="affiliation"><sup>9</sup> State Key Lab of General AI</span>
-                    <span class="affiliation"><sup>10</sup> Nat'l Eng. Research Center of Visual Technology</span>
-                </div>
-                <div class="affiliation-row">
-                    <span class="affiliation"><sup>11</sup> Beijing Key Laboratory of Behavior and Mental Health, Peking University</span>
-                    <span class="affiliation"><sup>12</sup> Embodied Intelligence Lab, PKU-Wuhan Institute for Artificial Intelligence</span>
-                </div>
-            </div>
-
-            <div class="contact-info">
-                <span class="equal-note">* Equal contribution</span>
-                <span>✉ yixin.zhu@pku.edu.cn, syhuang@bigai.ai</span>
-            </div>
-
-            <!-- NEW: Link Buttons -->
-            <div class="links-container">
-                <a href="https://www.arxiv.org/pdf/2512.24321" class="link-btn">
-                    <!-- Paper Icon -->
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-                    Paper
-                </a>
-                <a href="https://github.com/jnnan/uniact-code" class="link-btn">
-                    <!-- Code Icon -->
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
-                    Code
-                </a>
-                <a href="#dataset-section" class="link-btn">
-                    <!-- Dataset Icon -->
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></svg>
-                    Dataset
-                </a>
-                <a href="https://player.vimeo.com/video/1150342107" class="link-btn">
-                    <!-- Video Icon -->
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-                    Video
-                </a>
-            </div>
-
-            <!-- Abstract Section -->
-            <div class="abstract-section">
-                <div class="abstract-card">
-                    <div class="abstract-header">
-                        <span class="abstract-label">Abstract</span>
+        <div class="hero-inner">
+            <div class="hero-main">
+                <h1><span class="title-line-fixed"><span class="brand-word">OmniTrack</span>: General Motion Tracking</span><br>via Physics-Consistent Reference</h1>
+                <div class="authors-section">
+                    <div class="authors-row">
+                        <span class="author-name">Nan Jiang<sup>1,2,3,9,11<span class="equal-contrib">*</span></sup></span>
+                        <span class="author-name">Zimo He<sup>4,2,9,11<span class="equal-contrib">*</span></sup></span>
+                        <span class="author-name">Wanhe Yu<sup>1,3,5,9,11</sup></span>
+                        <span class="author-name">Lexi Pang<sup>1,3,5,9,11</sup></span>
+                        <span class="author-name">Yunhao Li<sup>6,3,9,11</sup></span>
+                        <span class="author-name">Hongjie Li<sup>7,3,9,11</sup></span>
                     </div>
-                    <p class="abstract-text">
-                        We propose <strong>UniAct</strong>, a two-stage framework integrating a fine-tuned MLLM with a causal streaming pipeline, enabling humanoid robots to execute multimodal instructions with <span class="highlight">sub-500ms latency</span>. By unifying inputs through a shared discrete codebook via FSQ, UniAct ensures <span class="highlight">cross-modal alignment</span> while constraining motions to a physically grounded manifold. This approach yields a <strong>19% improvement</strong> in the success rate of zero-shot tracking of imperfect reference motions. We validate UniAct on <strong>UA-Net</strong>, our 20-hour humanoid motion benchmark, demonstrating robust generalization across diverse real-world scenarios. Our results mark a critical step toward responsive, general-purpose humanoid assistants capable of seamless interaction through unified perception and control.
-                    </p>
-                </div>
-            </div>
-
-            <!-- NEW: Dataset Embed -->
-            <div id="dataset-section" class="dataset-wrapper">
-                <iframe src="dataset.html" class="dataset-iframe" title="Dataset Visualization" loading="lazy"></iframe>
-            </div>
-
-<!--            <a href="#" class="download-btn">Download UA-Net dataset</a>-->
-        </div>
-
-        <div class="scroll-indicator">
-            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M7 13l5 5 5-5M7 6l5 5 5-5"/>
-            </svg>
-        </div>
-    </section>
-
-    <!-- Section 2: Method Chart -->
-    <section class="method-section">
-        <div class="section-header">
-            <div class="section-subtitle">Architecture</div>
-            <h2 class="section-title">Method Framework</h2>
-        </div>
-        
-        <div class="iframe-wrapper" id="iframe-wrapper">
-            <iframe id="method-iframe" src="method.html" title="Dynamic Method Chart" loading="lazy"></iframe>
-        </div>
-
-        <!-- Method Introduction -->
-        <p class="method-description">
-            UniAct begins by accepting a diverse range of multimodal inputs, including text, music, trajectories, and specific motion references. To process this variety, a finite scalar quantizer encodes the inputs into discrete tokens. These tokens exist within a shared embedding space, allowing for seamless fusion across all different modalities. Once encoded, a trained multimodal large language model processes these tokens. It then generates specific motion tokens that represent the intended robot movements. To finish the process, a causal decoder converts those motion tokens into continuous degree-of-freedom values. These are streamed to a motion tracker to drive the robot in real time.
-        </p>
-    </section>
-
-    <!-- Section 3: Enhanced Video Gallery -->
-    <section class="gallery-section">
-        <div class="gallery-container">
-            <div class="section-header">
-                <div class="section-subtitle">Experiments</div>
-                <h2 class="section-title">Result Demonstrations</h2>
-            </div>
-
-            <div class="video-grid">
-                
-                <!-- Card 1 - Large Featured -->
-                <div class="video-card large">
-                    <span class="card-number">01</span>
-                    <div class="video-wrapper">
-                        <video controls loop muted playsinline>
-                            <source src="text.mp4" type="video/mp4">
-                        </video>
-                    </div>
-                    <div class="card-content">
-                        <div class="card-badge">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-                            Language Input
-                        </div>
-                        <h3 class="card-title">Text to Motion</h3>
-                        <p class="card-desc">Generating complex humanoid actions directly from natural language prompts with high fidelity and semantic understanding.</p>
+                    <div class="authors-row">
+                        <span class="author-name">Jieming Cui<sup>1,2,3,9,11</sup></span>
+                        <span class="author-name">Yuhan Li<sup>8,2</sup></span>
+                        <span class="author-name">Yizhou Wang<sup>4,9,10</sup></span>
+                        <span class="author-name">Yixin Zhu<sup>3,1,9,11,12</sup>✉</span>
+                        <span class="author-name">Siyuan Huang<sup>2,9</sup>✉</span>
                     </div>
                 </div>
 
-                <!-- Card 2 - Medium -->
-                <div class="video-card medium">
-                    <span class="card-number">02</span>
-                    <div class="video-wrapper">
-                        <video controls loop muted playsinline>
-                            <source src="music.mp4" type="video/mp4">
-                        </video>
+                <div class="affiliations-section">
+                    <div class="affiliation-row">
+                        <span class="affiliation"><sup>1</sup> Institute for AI, Peking University</span>
+                        <span class="affiliation"><sup>2</sup> Beijing Institute for General Artificial Intelligence (BIGAI)</span>
+                        <span class="affiliation"><sup>3</sup> School of Psychological and Cognitive Sciences, Peking University</span>
                     </div>
-                    <div class="card-content">
-                        <div class="card-badge">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>
-                            Audio Input
-                        </div>
-                        <h3 class="card-title">Music to Motion</h3>
-                        <p class="card-desc">Synchronizing movements with musical beats and rhythm patterns.</p>
+                    <div class="affiliation-row">
+                        <span class="affiliation"><sup>4</sup> School of Computer Science, Peking University</span>
+                        <span class="affiliation"><sup>5</sup> Yuanpei College, Peking University</span>
+                        <span class="affiliation"><sup>6</sup> School of Foreign Languages, Peking University</span>
+                        <span class="affiliation"><sup>7</sup> School of EECS, Peking University</span>
                     </div>
-                </div>
-
-                <!-- Card 3 - Medium -->
-                <div class="video-card medium">
-                    <span class="card-number">03</span>
-                    <div class="video-wrapper">
-                        <video controls loop muted playsinline>
-                            <source src="trajectory.mp4" type="video/mp4">
-                        </video>
+                    <div class="affiliation-row">
+                        <span class="affiliation"><sup>8</sup> Huazhong University of Science and Technology</span>
+                        <span class="affiliation"><sup>9</sup> State Key Lab of General AI</span>
+                        <span class="affiliation"><sup>10</sup> Nat'l Eng. Research Center of Visual Technology</span>
                     </div>
-                    <div class="card-content">
-                        <div class="card-badge">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>
-                            Path Control
-                        </div>
-                        <h3 class="card-title">Trajectory Control</h3>
-                        <p class="card-desc">Precise path following and spatial navigation.</p>
+                    <div class="affiliation-row">
+                        <span class="affiliation"><sup>11</sup> Beijing Key Laboratory of Behavior and Mental Health, Peking University</span>
+                        <span class="affiliation"><sup>12</sup> Embodied Intelligence Lab, PKU-Wuhan Institute for Artificial Intelligence</span>
                     </div>
                 </div>
 
-                <!-- Card 4 - Wide -->
-                <div class="video-card wide">
-                    <span class="card-number">04</span>
-                    <div class="video-wrapper">
-                        <video controls loop muted playsinline>
-                            <source src="cross_modal.mp4" type="video/mp4">
-                        </video>
-                    </div>
-                    <div class="card-content">
-                        <div class="card-badge">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
-                            Multi-Modal
-                        </div>
-                        <h3 class="card-title">Cross-Modal Generation</h3>
-                        <p class="card-desc">Translating inputs across different modalities for robust action synthesis.</p>
-                    </div>
+                <div class="contact-info">
+                    <span class="equal-note">* Equal contribution</span>
+                    <span>✉ yixin.zhu@pku.edu.cn, syhuang@bigai.ai</span>
                 </div>
 
-                <!-- Card 5 - Wide -->
-                <div class="video-card wide">
-                    <span class="card-number">05</span>
-                    <div class="video-wrapper">
-                        <video controls loop muted playsinline>
-                            <source src="gvhmr.mp4" type="video/mp4">
-                        </video>
-                    </div>
-                    <div class="card-content">
-                        <div class="card-badge">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                            Human Reference
-                        </div>
-                        <h3 class="card-title">Human Motion Imitating</h3>
-                        <p class="card-desc">GVHMR integration for real-time motion retargeting and imitating.</p>
-                    </div>
+                <div class="action-row">
+                    <a class="btn btn-ghost" href="https://www.arxiv.org/pdf/2512.24321">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                        Paper
+                    </a>
+                    <a class="btn btn-ghost" href="https://github.com/jnnan/uniact-code">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+                        Code
+                    </a>
+                    <a class="btn btn-ghost" href="dataset.html">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></svg>
+                        Dataset
+                    </a>
+                    <a class="btn btn-ghost" href="https://player.vimeo.com/video/1150342107">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                        Video
+                    </a>
                 </div>
-
             </div>
         </div>
     </section>
 
-    <!-- Auto-Resize Script for Iframe -->
+    <section class="section" id="overview">
+        <div class="section-head">
+            <h2 class="section-title">Abstract</h2>
+        </div>
+        <div class="overview-card">
+            <p>
+                Learning motion tracking from rich human motion data is a foundational task for achieving general control in humanoid robots, enabling them to perform diverse behaviors. However, discrepancies in morphology and dynamics between humans and robots, combined with data noise, introduce physically infeasible artifacts in reference motions, such as floating and penetration. During both training and execution, these artifacts create a conflict between following inaccurate reference motions and maintaining the robot's stability, hindering the development of a generalizable motion tracking policy.
+                To address these challenges, we introduce <span class="brand-inline">OmniTrack</span>, a general tracking framework that explicitly decouples physical feasibility from general motion tracking. In the first stage, a privileged generalist policy generates physically plausible motions that strictly adhere to the robot's dynamics via trajectory rollout in simulation. In the second stage, the general control policy is trained to track these physically feasible motions, ensuring stable and coherent control transfer to the real robot. Experiments show that <span class="brand-inline">OmniTrack</span> improves tracking accuracy and demonstrates strong generalization to unseen motions. In real-world tests, <span class="brand-inline">OmniTrack</span> achieves hour-long, consistent, and stable tracking, including complex acrobatic motions such as flips and cartwheels. Additionally, we show that <span class="brand-inline">OmniTrack</span> supports human-style stable and dynamic online teleoperation, highlighting its robustness and adaptability to varying user inputs.
+            </p>
+        </div>
+    </section>
+
+    <section class="section" id="method">
+        <div class="section-head">
+            <h2 class="section-title">OmniTrack Framework</h2>
+        </div>
+        <div class="frame-wrap method-frame" id="method-wrapper">
+            <iframe id="method-iframe" src="method.html" title="Method" loading="lazy" scrolling="no"></iframe>
+        </div>
+    </section>
+
+    <section class="section" id="results">
+        <div class="section-head">
+            <h2 class="section-title">Result Demonstrations</h2>
+        </div>
+
+        <div class="results-group">
+            <h3 class="results-group-title">Online Teleoperation (Mocap)</h3>
+            <div class="video-carousel" data-carousel>
+                <button class="carousel-btn prev" type="button" aria-label="Previous video">&#10094;</button>
+                <div class="carousel-viewport">
+                    <div class="carousel-track">
+                        <article class="card">
+                            <video autoplay controls loop muted playsinline preload="metadata">
+                                <source src="videos/results/online_teleoperation_mocap/demo_a.mp4" type="video/mp4">
+                            </video>
+                            <div class="card-body">
+                                <h3>Teleoperation Demo A</h3>
+                            </div>
+                        </article>
+
+                        <article class="card">
+                            <video autoplay controls loop muted playsinline preload="metadata">
+                                <source src="videos/results/online_teleoperation_mocap/demo_b.mp4" type="video/mp4">
+                            </video>
+                            <div class="card-body">
+                                <h3>Teleoperation Demo B</h3>
+                            </div>
+                        </article>
+
+                        <article class="card">
+                            <video autoplay controls loop muted playsinline preload="metadata">
+                                <source src="videos/results/online_teleoperation_mocap/demo_c.mp4" type="video/mp4">
+                            </video>
+                            <div class="card-body">
+                                <h3>Teleoperation Demo C</h3>
+                            </div>
+                        </article>
+
+                        <article class="card">
+                            <video autoplay controls loop muted playsinline preload="metadata">
+                                <source src="videos/results/online_teleoperation_mocap/demo_d.mp4" type="video/mp4">
+                            </video>
+                            <div class="card-body">
+                                <h3>Teleoperation Demo D</h3>
+                            </div>
+                        </article>
+                    </div>
+                </div>
+                <button class="carousel-btn next" type="button" aria-label="Next video">&#10095;</button>
+            </div>
+        </div>
+
+        <div class="results-group">
+            <h3 class="results-group-title">Online Teleoperation (Pico)</h3>
+            <div class="video-carousel" data-carousel>
+                <button class="carousel-btn prev" type="button" aria-label="Previous video">&#10094;</button>
+                <div class="carousel-viewport">
+                    <div class="carousel-track">
+                        <article class="card">
+                            <video autoplay controls loop muted playsinline preload="metadata">
+                                <source src="videos/results/online_teleoperation_pico/demo_a.mp4" type="video/mp4">
+                            </video>
+                            <div class="card-body">
+                                <h3>Pico Teleoperation Demo A</h3>
+                            </div>
+                        </article>
+
+                        <article class="card">
+                            <video autoplay controls loop muted playsinline preload="metadata">
+                                <source src="videos/results/online_teleoperation_pico/demo_b.mp4" type="video/mp4">
+                            </video>
+                            <div class="card-body">
+                                <h3>Pico Teleoperation Demo B</h3>
+                            </div>
+                        </article>
+
+                        <article class="card">
+                            <video autoplay controls loop muted playsinline preload="metadata">
+                                <source src="videos/results/online_teleoperation_pico/demo_c.mp4" type="video/mp4">
+                            </video>
+                            <div class="card-body">
+                                <h3>Pico Teleoperation Demo C</h3>
+                            </div>
+                        </article>
+
+                        <article class="card">
+                            <video autoplay controls loop muted playsinline preload="metadata">
+                                <source src="videos/results/online_teleoperation_pico/demo_d.mp4" type="video/mp4">
+                            </video>
+                            <div class="card-body">
+                                <h3>Pico Teleoperation Demo D</h3>
+                            </div>
+                        </article>
+                    </div>
+                </div>
+                <button class="carousel-btn next" type="button" aria-label="Next video">&#10095;</button>
+            </div>
+        </div>
+
+        <div class="results-group">
+            <h3 class="results-group-title">Diverse Motion Tracking</h3>
+        </div>
+
+        <div class="results-group">
+            <h3 class="results-group-title">Balance</h3>
+            <div class="video-carousel" data-carousel>
+                <button class="carousel-btn prev" type="button" aria-label="Previous video">&#10094;</button>
+                <div class="carousel-viewport">
+                    <div class="carousel-track">
+                        <article class="card">
+                            <video autoplay controls loop muted playsinline preload="metadata">
+                                <source src="videos/results/balance/demo_a.mp4" type="video/mp4">
+                            </video>
+                            <div class="card-body">
+                                <h3>Balance Demo A</h3>
+                            </div>
+                        </article>
+                        <article class="card">
+                            <video autoplay controls loop muted playsinline preload="metadata">
+                                <source src="videos/results/balance/demo_b.mp4" type="video/mp4">
+                            </video>
+                            <div class="card-body">
+                                <h3>Balance Demo B</h3>
+                            </div>
+                        </article>
+                        <article class="card">
+                            <video autoplay controls loop muted playsinline preload="metadata">
+                                <source src="videos/results/balance/demo_c.mp4" type="video/mp4">
+                            </video>
+                            <div class="card-body">
+                                <h3>Balance Demo C</h3>
+                            </div>
+                        </article>
+                    </div>
+                </div>
+                <button class="carousel-btn next" type="button" aria-label="Next video">&#10095;</button>
+            </div>
+        </div>
+
+        <div class="results-group">
+            <h3 class="results-group-title">High-Dynamics</h3>
+            <div class="video-carousel" data-carousel>
+                <button class="carousel-btn prev" type="button" aria-label="Previous video">&#10094;</button>
+                <div class="carousel-viewport">
+                    <div class="carousel-track">
+                        <article class="card">
+                            <video autoplay controls loop muted playsinline preload="metadata">
+                                <source src="videos/results/high_dynamics/demo_a.mp4" type="video/mp4">
+                            </video>
+                            <div class="card-body">
+                                <h3>High-Dynamics Demo A</h3>
+                            </div>
+                        </article>
+                        <article class="card">
+                            <video autoplay controls loop muted playsinline preload="metadata">
+                                <source src="videos/results/high_dynamics/demo_b.mp4" type="video/mp4">
+                            </video>
+                            <div class="card-body">
+                                <h3>High-Dynamics Demo B</h3>
+                            </div>
+                        </article>
+                        <article class="card">
+                            <video autoplay controls loop muted playsinline preload="metadata">
+                                <source src="videos/results/high_dynamics/demo_c.mp4" type="video/mp4">
+                            </video>
+                            <div class="card-body">
+                                <h3>High-Dynamics Demo C</h3>
+                            </div>
+                        </article>
+                    </div>
+                </div>
+                <button class="carousel-btn next" type="button" aria-label="Next video">&#10095;</button>
+            </div>
+        </div>
+
+        <div class="results-group">
+            <h3 class="results-group-title">Contact-Rich</h3>
+            <div class="video-carousel" data-carousel>
+                <button class="carousel-btn prev" type="button" aria-label="Previous video">&#10094;</button>
+                <div class="carousel-viewport">
+                    <div class="carousel-track">
+                        <article class="card">
+                            <video autoplay controls loop muted playsinline preload="metadata">
+                                <source src="videos/results/contact_rich/demo_a.mp4" type="video/mp4">
+                            </video>
+                            <div class="card-body">
+                                <h3>Contact-Rich Demo A</h3>
+                            </div>
+                        </article>
+                        <article class="card">
+                            <video autoplay controls loop muted playsinline preload="metadata">
+                                <source src="videos/results/contact_rich/demo_b.mp4" type="video/mp4">
+                            </video>
+                            <div class="card-body">
+                                <h3>Contact-Rich Demo B</h3>
+                            </div>
+                        </article>
+                        <article class="card">
+                            <video autoplay controls loop muted playsinline preload="metadata">
+                                <source src="videos/results/contact_rich/demo_c.mp4" type="video/mp4">
+                            </video>
+                            <div class="card-body">
+                                <h3>Contact-Rich Demo C</h3>
+                            </div>
+                        </article>
+                    </div>
+                </div>
+                <button class="carousel-btn next" type="button" aria-label="Next video">&#10095;</button>
+            </div>
+        </div>
+
+        <div class="results-group">
+            <h3 class="results-group-title">One-hour Tracking</h3>
+            <article class="feature-video">
+                <video autoplay controls loop muted playsinline preload="metadata">
+                    <source src="videos/results/one_hour_tracking/demo_a.mp4" type="video/mp4">
+                </video>
+                <div class="feature-body">
+                    <h3>Long-Horizon Tracking</h3>
+                    <p>Continuous 1-hour demo.</p>
+                </div>
+            </article>
+        </div>
+    </section>
+
+    <div class="footer">
+        © 2026 UniAct Project Team. Replace this with your official copyright notice.
+    </div>
+
     <script>
-        const iframe = document.getElementById('method-iframe');
-        const wrapper = document.getElementById('iframe-wrapper');
+        const iframe = document.getElementById("method-iframe");
+        const wrapper = document.getElementById("method-wrapper");
+
+        if ("scrollRestoration" in history) {
+            history.scrollRestoration = "manual";
+        }
+
+        window.addEventListener("load", () => {
+            window.scrollTo(0, 0);
+        });
 
         function resizeIframe() {
             try {
-                // Attempt to get the height of the content inside the iframe
                 const innerDoc = iframe.contentDocument || iframe.contentWindow.document;
-                if (innerDoc && innerDoc.body) {
-                    const newHeight = innerDoc.body.scrollHeight;
-                    // Apply height to wrapper
-                    wrapper.style.height = newHeight + 'px';
+                if (innerDoc && innerDoc.body && innerDoc.documentElement) {
+                    const h = Math.max(
+                        innerDoc.body.scrollHeight,
+                        innerDoc.documentElement.scrollHeight
+                    );
+                    if (h > 500) {
+                        const target = h + 2;
+                        wrapper.style.height = target + "px";
+                        iframe.style.height = target + "px";
+                    }
                 }
             } catch (e) {
-                console.log("Cannot auto-resize iframe due to Cross-Origin restrictions. Falling back to CSS height.");
+                console.log("iframe auto-resize fallback");
             }
         }
 
-        // Run on load
-        iframe.onload = resizeIframe;
-        
-        // Optional: Run on window resize just in case the inner content reflows
-        window.addEventListener('resize', resizeIframe);
-    </script>
+        window.addEventListener("message", (event) => {
+            const data = event.data;
+            if (!data || data.type !== "method-height") return;
+            const h = Number(data.height);
+            if (!Number.isFinite(h) || h < 300) return;
+            const target = Math.ceil(h) + 2;
+            wrapper.style.height = target + "px";
+            iframe.style.height = target + "px";
+        });
 
+        iframe.onload = resizeIframe;
+        window.addEventListener("resize", resizeIframe);
+        setTimeout(resizeIframe, 300);
+        setTimeout(resizeIframe, 1000);
+
+        function initVideoCarousels() {
+            const carousels = Array.from(document.querySelectorAll("[data-carousel]"));
+            carousels.forEach((carousel) => {
+                const track = carousel.querySelector(".carousel-track");
+                const prev = carousel.querySelector(".carousel-btn.prev");
+                const next = carousel.querySelector(".carousel-btn.next");
+                if (!track || !prev || !next) return;
+                const cards = Array.from(track.querySelectorAll(".card"));
+                if (cards.length === 0) return;
+
+                let current = 0;
+                let timerId = null;
+
+                const update = () => {
+                    const n = cards.length;
+                    cards.forEach((card, idx) => {
+                        card.classList.remove("is-active", "is-prev", "is-next", "is-prev2", "is-next2", "is-hidden");
+                        let diff = idx - current;
+                        if (diff > n / 2) diff -= n;
+                        if (diff < -n / 2) diff += n;
+
+                        if (diff === 0) card.classList.add("is-active");
+                        else if (diff === -1) card.classList.add("is-prev");
+                        else if (diff === 1) card.classList.add("is-next");
+                        else if (diff === -2) card.classList.add("is-prev2");
+                        else if (diff === 2) card.classList.add("is-next2");
+                        else card.classList.add("is-hidden");
+                    });
+                };
+
+                const go = (step) => {
+                    current = (current + step + cards.length) % cards.length;
+                    update();
+                };
+
+                const startAuto = () => {
+                    if (timerId) return;
+                    timerId = setInterval(() => go(1), 3200);
+                };
+
+                const stopAuto = () => {
+                    if (!timerId) return;
+                    clearInterval(timerId);
+                    timerId = null;
+                };
+
+                prev.addEventListener("click", () => go(-1));
+                next.addEventListener("click", () => go(1));
+                carousel.addEventListener("mouseenter", stopAuto);
+                carousel.addEventListener("mouseleave", startAuto);
+
+                update();
+                startAuto();
+            });
+        }
+
+        initVideoCarousels();
+    </script>
 </body>
 </html>

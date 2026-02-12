@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OmniTrack: General Motion Tracking via Physics-Consistent Reference</title>
+    <style>
+        :root {
+            --bg: #f5f5f7;
+            --bg-soft: #fbfbfd;
+            --text: #1d1d1f;
+            --muted: #6e6e73;
+            --line: #d2d2d7;
+            --blue: #0071e3;
+            --blue-2: #5a4bff;
+            --card: rgba(255, 255, 255, 0.82);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            color: var(--text);
+            background:
+                radial-gradient(1000px 550px at 15% -20%, rgba(73, 136, 255, 0.22), transparent 65%),
+                radial-gradient(900px 520px at 88% -12%, rgba(126, 104, 255, 0.18), transparent 62%),
+                linear-gradient(180deg, var(--bg-soft) 0%, var(--bg) 100%);
+            overflow-x: hidden;
+        }
+
+        .page {
+            width: min(1240px, calc(100% - 40px));
+            margin: 0 auto;
+        }
+
+        .hero {
+            min-height: 98vh;
+            display: grid;
+            place-items: center;
+            padding: 72px 0 48px;
+            text-align: center;
+        }
+
+        .hero-card {
+            width: 100%;
+            background: var(--card);
+            border: 1px solid rgba(255, 255, 255, 0.9);
+            border-radius: 34px;
+            backdrop-filter: blur(14px);
+            box-shadow: 0 18px 46px rgba(18, 40, 85, 0.11);
+            padding: 44px 34px;
+            animation: fadeUp 0.8s ease both;
+        }
+
+        h1 {
+            font-size: clamp(2.3rem, 3.9vw, 4.35rem);
+            letter-spacing: -0.02em;
+            line-height: 1.06;
+            margin-bottom: 18px;
+        }
+
+        .brand-word {
+            background: linear-gradient(135deg, #1f6dff 0%, #5a4bff 75%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 800;
+        }
+
+        .authors-section {
+            margin: 0 auto 10px;
+            max-width: 1080px;
+        }
+
+        .authors-row {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 2px 18px;
+            margin-bottom: 2px;
+            line-height: 1.45;
+        }
+
+        .author-name {
+            color: #2f2f33;
+            font-size: 0.96rem;
+        }
+
+        .author-name sup {
+            font-size: 0.62rem;
+            color: var(--blue);
+        }
+
+        .equal-contrib {
+            color: #ff7f50;
+        }
+
+        .affiliations-section {
+            margin: 8px auto 10px;
+            max-width: 1100px;
+        }
+
+        .affiliation-row {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 2px 15px;
+            margin-bottom: 2px;
+            line-height: 1.35;
+        }
+
+        .affiliation {
+            font-size: 0.79rem;
+            color: var(--muted);
+        }
+
+        .affiliation sup {
+            color: var(--blue);
+            font-size: 0.56rem;
+        }
+
+        .contact-info {
+            color: var(--muted);
+            font-size: 0.84rem;
+            margin-bottom: 16px;
+        }
+
+        .contact-info .equal-note {
+            margin-right: 14px;
+        }
+
+        .action-row {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 8px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 18px;
+            border-radius: 999px;
+            border: 1px solid var(--line);
+            background: rgba(255, 255, 255, 0.9);
+            color: #2b2b30;
+            text-decoration: none;
+            font-size: 0.94rem;
+            font-weight: 600;
+            transition: all 0.24s ease;
+        }
+
+        .btn:hover {
+            background: linear-gradient(135deg, #0a84ff 0%, #5e5ce6 100%);
+            color: #fff;
+            border-color: #0a84ff;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 24px rgba(17, 87, 217, 0.24);
+        }
+
+        .btn svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .section {
+            padding: 70px 0;
+        }
+
+        .section-head {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .section-title {
+            font-size: clamp(1.9rem, 3.2vw, 2.9rem);
+            letter-spacing: -0.02em;
+            margin-bottom: 7px;
+        }
+
+        .section-sub {
+            color: var(--muted);
+            font-size: 1rem;
+        }
+
+        .panel {
+            background: rgba(255, 255, 255, 0.86);
+            border: 1px solid rgba(255, 255, 255, 0.95);
+            border-radius: 28px;
+            box-shadow: 0 14px 34px rgba(18, 40, 85, 0.1);
+            padding: 26px;
+            backdrop-filter: blur(8px);
+        }
+
+        .overview {
+            text-align: center;
+            color: #3f3f45;
+            line-height: 1.8;
+            max-width: 930px;
+            margin: 0 auto;
+        }
+
+        .frame-wrap {
+            overflow: hidden;
+            border-radius: 24px;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            background: #fff;
+            box-shadow: 0 14px 34px rgba(18, 40, 85, 0.1);
+        }
+
+        .dataset-frame {
+            height: 540px;
+        }
+
+        .method-frame {
+            min-height: 860px;
+        }
+
+        .frame-wrap iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 18px;
+        }
+
+        .card {
+            grid-column: span 2;
+            overflow: hidden;
+            border-radius: 22px;
+            border: 1px solid rgba(0, 0, 0, 0.06);
+            background: #fff;
+            box-shadow: 0 10px 28px rgba(18, 40, 85, 0.09);
+            transition: transform 0.24s ease, box-shadow 0.24s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 18px 36px rgba(18, 40, 85, 0.15);
+        }
+
+        .card.large {
+            grid-column: span 4;
+        }
+
+        .card video {
+            width: 100%;
+            aspect-ratio: 16/9;
+            background: #f0f4f8;
+        }
+
+        .card-body {
+            padding: 14px 16px 18px;
+        }
+
+        .card-label {
+            display: inline-block;
+            border-radius: 999px;
+            font-size: 0.74rem;
+            background: rgba(10, 132, 255, 0.12);
+            color: #005fcb;
+            padding: 4px 10px;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+
+        .card h3 {
+            font-size: 1.06rem;
+            margin-bottom: 4px;
+            letter-spacing: -0.01em;
+        }
+
+        .card p {
+            color: var(--muted);
+            font-size: 0.9rem;
+        }
+
+        .footer {
+            text-align: center;
+            color: #8d8d93;
+            font-size: 0.9rem;
+            padding: 34px 0 28px;
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 1080px) {
+            .gallery {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .card,
+            .card.large {
+                grid-column: span 1;
+            }
+
+            .method-frame {
+                min-height: 720px;
+            }
+        }
+
+        @media (max-width: 760px) {
+            .hero {
+                padding-top: 52px;
+            }
+
+            .hero-card {
+                padding: 30px 18px;
+            }
+
+            .dataset-frame {
+                height: 460px;
+            }
+
+            .method-frame {
+                min-height: 620px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="page">
+        <section class="hero">
+            <div class="hero-card">
+                <h1><span class="brand-word">OmniTrack</span>: General Motion Tracking<br>via Physics-Consistent Reference</h1>
+
+                <div class="authors-section">
+                    <div class="authors-row">
+                        <span class="author-name">Nan Jiang<sup>1,2,3,9,11<span class="equal-contrib">*</span></sup></span>
+                        <span class="author-name">Zimo He<sup>4,2,9,11<span class="equal-contrib">*</span></sup></span>
+                        <span class="author-name">Wanhe Yu<sup>1,3,5,9,11</sup></span>
+                        <span class="author-name">Lexi Pang<sup>1,3,5,9,11</sup></span>
+                        <span class="author-name">Yunhao Li<sup>6,3,9,11</sup></span>
+                        <span class="author-name">Hongjie Li<sup>7,3,9,11</sup></span>
+                    </div>
+                    <div class="authors-row">
+                        <span class="author-name">Jieming Cui<sup>1,2,3,9,11</sup></span>
+                        <span class="author-name">Yuhan Li<sup>8,2</sup></span>
+                        <span class="author-name">Yizhou Wang<sup>4,9,10</sup></span>
+                        <span class="author-name">Yixin Zhu<sup>3,1,9,11,12</sup>✉</span>
+                        <span class="author-name">Siyuan Huang<sup>2,9</sup>✉</span>
+                    </div>
+                </div>
+
+                <div class="affiliations-section">
+                    <div class="affiliation-row">
+                        <span class="affiliation"><sup>1</sup> Institute for AI, Peking University</span>
+                        <span class="affiliation"><sup>2</sup> Beijing Institute for General Artificial Intelligence (BIGAI)</span>
+                        <span class="affiliation"><sup>3</sup> School of Psychological and Cognitive Sciences, Peking University</span>
+                    </div>
+                    <div class="affiliation-row">
+                        <span class="affiliation"><sup>4</sup> School of Computer Science, Peking University</span>
+                        <span class="affiliation"><sup>5</sup> Yuanpei College, Peking University</span>
+                        <span class="affiliation"><sup>6</sup> School of Foreign Languages, Peking University</span>
+                        <span class="affiliation"><sup>7</sup> School of EECS, Peking University</span>
+                    </div>
+                    <div class="affiliation-row">
+                        <span class="affiliation"><sup>8</sup> Huazhong University of Science and Technology</span>
+                        <span class="affiliation"><sup>9</sup> State Key Lab of General AI</span>
+                        <span class="affiliation"><sup>10</sup> Nat'l Eng. Research Center of Visual Technology</span>
+                    </div>
+                    <div class="affiliation-row">
+                        <span class="affiliation"><sup>11</sup> Beijing Key Laboratory of Behavior and Mental Health, Peking University</span>
+                        <span class="affiliation"><sup>12</sup> Embodied Intelligence Lab, PKU-Wuhan Institute for Artificial Intelligence</span>
+                    </div>
+                </div>
+
+                <div class="contact-info">
+                    <span class="equal-note">* Equal contribution</span>
+                    <span>✉ yixin.zhu@pku.edu.cn, syhuang@bigai.ai</span>
+                </div>
+
+                <div class="action-row">
+                    <a class="btn" href="https://www.arxiv.org/pdf/2512.24321">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                        Paper
+                    </a>
+                    <a class="btn" href="https://github.com/jnnan/uniact-code">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+                        Code
+                    </a>
+                    <a class="btn" href="#dataset">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></svg>
+                        Dataset
+                    </a>
+                    <a class="btn" href="https://player.vimeo.com/video/1150342107">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                        Video
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <section class="section" id="overview">
+            <div class="section-head">
+                <h2 class="section-title">Overview</h2>
+                <p class="section-sub">Unified multimodal understanding and physically grounded motion generation for humanoid robots.</p>
+            </div>
+            <div class="panel overview">
+                <p>
+                    <strong>OmniTrack</strong> encodes language, audio, trajectory, and motion references into a shared discrete space, then
+                    decodes streaming motion tokens into continuous robot joint controls. This pipeline balances <strong>fast response</strong> and
+                    <strong>motion stability</strong>, enabling open-world interaction and online reference tracking.
+                </p>
+            </div>
+        </section>
+
+        <section class="section" id="dataset">
+            <div class="section-head">
+                <h2 class="section-title">Dataset Explorer</h2>
+                <p class="section-sub">Embedded `dataset.html` viewer for searching and previewing motion clips.</p>
+            </div>
+            <div class="frame-wrap dataset-frame">
+                <iframe src="dataset.html" title="Dataset" loading="lazy"></iframe>
+            </div>
+        </section>
+
+        <section class="section" id="method">
+            <div class="section-head">
+                <h2 class="section-title">Method Framework</h2>
+                <p class="section-sub">Embedded `method.html` showing end-to-end multimodal-to-motion architecture.</p>
+            </div>
+            <div class="frame-wrap method-frame" id="method-wrapper-apple">
+                <iframe id="method-iframe-apple" src="method.html" title="Method" loading="lazy"></iframe>
+            </div>
+        </section>
+
+        <section class="section" id="results">
+            <div class="section-head">
+                <h2 class="section-title">Result Demonstrations</h2>
+                <p class="section-sub">Original project videos, presented in an Apple-style product-page layout.</p>
+            </div>
+
+            <div class="gallery">
+                <article class="card large">
+                    <video controls loop muted playsinline>
+                        <source src="text.mp4" type="video/mp4">
+                    </video>
+                    <div class="card-body">
+                        <span class="card-label">Text Input</span>
+                        <h3>Text-to-Motion Generation</h3>
+                        <p>End-to-end generation of robot actions from natural language prompts.</p>
+                    </div>
+                </article>
+
+                <article class="card">
+                    <video controls loop muted playsinline>
+                        <source src="music.mp4" type="video/mp4">
+                    </video>
+                    <div class="card-body">
+                        <span class="card-label">Audio Input</span>
+                        <h3>Music-Conditioned Motion</h3>
+                        <p>Action sequences synchronized with rhythm and beat dynamics.</p>
+                    </div>
+                </article>
+
+                <article class="card">
+                    <video controls loop muted playsinline>
+                        <source src="trajectory.mp4" type="video/mp4">
+                    </video>
+                    <div class="card-body">
+                        <span class="card-label">Path Input</span>
+                        <h3>Trajectory Control</h3>
+                        <p>Stable motion execution under explicit spatial path constraints.</p>
+                    </div>
+                </article>
+
+                <article class="card">
+                    <video controls loop muted playsinline>
+                        <source src="cross_modal.mp4" type="video/mp4">
+                    </video>
+                    <div class="card-body">
+                        <span class="card-label">Cross-modal</span>
+                        <h3>Cross-Modal Transfer</h3>
+                        <p>Shared representation enables robust transfer across modalities.</p>
+                    </div>
+                </article>
+
+                <article class="card">
+                    <video controls loop muted playsinline>
+                        <source src="gvhmr.mp4" type="video/mp4">
+                    </video>
+                    <div class="card-body">
+                        <span class="card-label">Human Motion</span>
+                        <h3>Human Reference Tracking</h3>
+                        <p>Online imitation with stronger consistency to imperfect references.</p>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+        <footer class="footer">
+            © 2026 OmniTrack Project Team.
+        </footer>
+    </main>
+
+    <script>
+        const iframe = document.getElementById("method-iframe-apple");
+        const wrapper = document.getElementById("method-wrapper-apple");
+
+        function resizeIframe() {
+            try {
+                const innerDoc = iframe.contentDocument || iframe.contentWindow.document;
+                if (innerDoc && innerDoc.body) {
+                    const h = innerDoc.body.scrollHeight;
+                    if (h > 500) {
+                        wrapper.style.height = h + "px";
+                    }
+                }
+            } catch (e) {
+                console.log("iframe auto-resize fallback");
+            }
+        }
+
+        iframe.onload = resizeIframe;
+        window.addEventListener("resize", resizeIframe);
+    </script>
+</body>
+</html>
