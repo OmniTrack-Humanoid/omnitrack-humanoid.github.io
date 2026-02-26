@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Local Index Generator (Compact)</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/universal-sentence-encoder"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+        h1 {
+            font-size: 1.5rem;
+            color: #2c3e50;
+            margin-top: 2rem;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 0.5rem;
+        }
+        textarea {
+            width: 100%;
+            height: 200px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            padding: 10px;
+            font-family: monospace;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        button:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+        }
+
+        /* Progress Bar Styles */
+        .progress-container {
+            margin-top: 20px;
+            background-color: #e0e0e0;
+            border-radius: 8px;
+            height: 24px;
+            width: 100%;
+            overflow: hidden;
+            display: none;
+        }
+
+        .progress-bar {
+            background-color: #27ae60;
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease;
+            text-align: center;
+            line-height: 24px;
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .stats {
+            margin-top: 10px;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .error {
+            color: #c0392b;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>1. Data Preparation</h1>
+    <p>Paste your JSON list of videos here (Format: Array of objects with filename and url):</p>
+    <textarea id="rawData" placeholder='[{"filename": "...", "url": "..."}]'>
+[
+  {"filename": "cat_jumping.mp4", "url": "https://your-bucket.com/cat_jumping.mp4"},
+  {"filename": "dog_barking.mp4", "url": "https://your-bucket.com/dog_barking.mp4"}
+]
+    </textarea>
+
+    <h1>2. Generate Embeddings</h1>
+    <button id="generateBtn" onclick="generateIndex()">Generate & Download database.json</button>
+
+    <div class="progress-container" id="progressContainer">
+        <div class="progress-bar" id="progressBar">0%</div>
+    </div>
+
+    <div class="stats" id="status">Status: Waiting for input...</div>
+
+    <script>
+        async function generateIndex() {
+            const status = document.getElementById('status');
+            const btn = document.getElementById('generateBtn');
+            const progressContainer = document.getElementById('progressContainer');
+            const progressBar = document.getElementById('progressBar');
+            const rawData = document.getElementById('rawData');
+
+            // Reset UI
+            status.innerText = "Status: Loading Model (this may take a moment)...";
+            status.className = "stats";
+            btn.disabled = true;
+            progressContainer.style.display = 'block';
+            progressBar.style.width = '0%';
+            progressBar.innerText = '0%';
+
+            try {
+                // 1. Validation
+                let data;
+                try {
+                    data = JSON.parse(rawData.value);
+                    if (!Array.isArray(data)) throw new Error("Input must be an array");
+                } catch (e) {
+                    throw new Error("Invalid JSON format. Please check your input.");
+                }
+
+                if (data.length === 0) {
+                    throw new Error("The array is empty.");
+                }
+
+                // 2. Load Model
+                const model = await use.load();
+
+                status.innerText = `Status: Processing ${data.length} items...`;
+
+                // 3. Process in batches
+                const vectors = [];
+                const batchSize = 50;
+                const total = data.length;
+                const startTime = Date.now();
+
+                for (let i = 0; i < total; i += batchSize) {
+                    const batch = data.slice(i, i + batchSize);
+
+                    // Clean filenames
+                    const sentences = batch.map(b => {
+                        return (b.filename || "")
+                            .replace(/\.[^/.]+$/, "")
+                            .replace(/[-_.]/g, ' ');
+                    });
+
+                    // Generate embeddings
+                    const embeddings = await model.embed(sentences);
+                    const batchVectors = await embeddings.array();
+
+                    // Merge and Round
+                    batchVectors.forEach((vec, idx) => {
+                        // --- OPTIMIZATION HERE ---
+                        // Round to 4 decimal places to reduce JSON size
+                        const shortVec = vec.map(n => Math.round(n * 10000) / 10000);
+
+                        vectors.push({
+                            ...batch[idx],
+                            vec: shortVec
+                        });
+                    });
+
+                    embeddings.dispose();
+
+                    // Update Progress Bar
+                    const currentCount = vectors.length;
+                    const percent = Math.round((currentCount / total) * 100);
+                    progressBar.style.width = `${percent}%`;
+                    progressBar.innerText = `${percent}%`;
+
+                    // Calculate ETA
+                    const elapsedTime = Date.now() - startTime;
+                    const msPerItem = elapsedTime / currentCount;
+                    const remainingItems = total - currentCount;
+                    const remainingMs = remainingItems * msPerItem;
+                    const remainingSeconds = Math.ceil(remainingMs / 1000);
+
+                    status.innerText = `Status: Processed ${currentCount} / ${total} items. (Est. remaining: ${remainingSeconds}s)`;
+
+                    // Allow UI to repaint
+                    await new Promise(r => setTimeout(r, 20));
+                }
+
+                // 4. Download File
+                status.innerText = "Status: Generating JSON file...";
+                const blob = new Blob([JSON.stringify(vectors)], {type: "application/json"});
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = "database.json";
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+
+                status.innerText = "Status: Done! Upload database.json to GitHub.";
+                progressBar.style.backgroundColor = "#2ecc71";
+
+            } catch (err) {
+                console.error(err);
+                status.innerText = `Error: ${err.message}`;
+                status.className = "stats error";
+                progressBar.style.backgroundColor = "#e74c3c";
+            } finally {
+                btn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>

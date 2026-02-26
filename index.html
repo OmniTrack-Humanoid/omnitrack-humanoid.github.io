@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OmniTrack: General Motion Tracking via Physics-Consistent Reference</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #f5fbff;
+            --bg-soft: #eaf5fb;
+            --panel: rgba(255, 255, 255, 0.92);
+            --panel-border: rgba(27, 109, 148, 0.18);
+            --text: #163142;
+            --text-dim: #456378;
+            --accent: #2c8dca;
+            --accent-2: #ff9e57;
+            --intro-delay: 1.5s;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: auto;
+        }
+
+        body {
+            font-family: "Space Grotesk", "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+            color: var(--text);
+            background:
+                radial-gradient(1200px 600px at 10% -10%, rgba(126, 219, 255, 0.4), transparent 60%),
+                radial-gradient(900px 500px at 90% 0%, rgba(255, 215, 174, 0.42), transparent 58%),
+                linear-gradient(180deg, var(--bg) 0%, #eef7fc 100%);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .hero {
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            padding: 110px 20px 60px;
+            overflow: hidden;
+            text-align: center;
+        }
+
+        .hero-bg {
+            position: absolute;
+            inset: 0;
+            z-index: -2;
+            overflow: hidden;
+        }
+
+        .hero-bg video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 1;
+            filter: saturate(1.1) contrast(1.05);
+            animation: videoDim 1.2s ease-out forwards;
+            animation-delay: var(--intro-delay);
+        }
+
+        .hero-overlay {
+            position: absolute;
+            inset: 0;
+            z-index: -1;
+            background:
+                linear-gradient(180deg, rgba(245, 251, 255, 0.02) 0%, rgba(245, 251, 255, 0.45) 58%, rgba(238, 247, 252, 0.72) 100%);
+            opacity: 0;
+            animation: overlayIn 1.2s ease-out forwards;
+            animation-delay: var(--intro-delay);
+        }
+
+        .hero-inner {
+            width: min(1400px, 100%);
+            margin: 0 auto;
+            display: flex;
+            justify-content: center;
+            align-items: start;
+        }
+
+        h1 {
+            font-family: Arial, "Helvetica Neue", Helvetica, sans-serif;
+            font-size: clamp(2.7rem, 4.1vw, 4.6rem);
+            line-height: 1.12;
+            letter-spacing: -0.01em;
+            margin-bottom: 18px;
+            color: #0f2d40;
+            margin-left: auto;
+            margin-right: auto;
+            max-width: 1300px;
+        }
+
+        .title-line-fixed {
+            white-space: nowrap;
+        }
+
+        .brand-word {
+            font-family: inherit;
+            font-weight: 800;
+            font-size: 1.08em;
+            letter-spacing: 0.02em;
+            line-height: 1;
+            background: linear-gradient(135deg, #1f7ab1 0%, #3f8cff 45%, #7a5cff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 3px 14px rgba(82, 112, 255, 0.34);
+            vertical-align: baseline;
+        }
+
+        .brand-inline {
+            font-weight: 800;
+            background: linear-gradient(135deg, #1f7ab1 0%, #3f8cff 45%, #7a5cff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 2px 10px rgba(82, 112, 255, 0.28);
+        }
+
+        .headline-sub {
+            color: var(--text-dim);
+            max-width: 880px;
+            margin-bottom: 28px;
+            font-size: clamp(1rem, 1.4vw, 1.15rem);
+        }
+
+        .action-row {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 24px;
+            margin-top: 16px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            border-radius: 999px;
+            padding: 12px 22px;
+            font-size: 1.03rem;
+            font-weight: 600;
+            transition: 0.25s ease;
+            border: 1px solid transparent;
+        }
+
+        .btn-ghost {
+            color: #24516a;
+            background: rgba(255, 255, 255, 0.86);
+            border-color: rgba(36, 94, 124, 0.2);
+        }
+
+        .btn-ghost:hover {
+            background: linear-gradient(135deg, #3f9bd5 0%, #2c8dca 100%);
+            border-color: #2c8dca;
+            color: #ffffff;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 22px rgba(44, 141, 202, 0.25);
+        }
+
+        .btn svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .hero-note {
+            color: #5b778a;
+            font-size: 0.92rem;
+        }
+
+        .hero-main {
+            max-width: 1300px;
+            opacity: 0;
+            transform: translateY(16px);
+            animation: heroReveal 0.9s ease-out forwards;
+            animation-delay: var(--intro-delay);
+        }
+
+        .authors-section {
+            margin-bottom: 8px;
+            max-width: 1100px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .authors-row {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 2px 18px;
+            margin-bottom: 2px;
+            line-height: 1.4;
+        }
+
+        .author-name {
+            font-size: 1.08rem;
+            color: #2f5368;
+        }
+
+        .author-name sup {
+            font-size: 0.6rem;
+            color: var(--accent);
+        }
+
+        .equal-contrib {
+            color: #e28743;
+        }
+
+        .affiliations-section {
+            margin-bottom: 8px;
+            max-width: 1100px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .affiliation-row {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 2px 16px;
+            margin-bottom: 1px;
+            line-height: 1.4;
+        }
+
+        .affiliation {
+            font-size: 0.9rem;
+            color: #5b778a;
+        }
+
+        .affiliation sup {
+            font-size: 0.56rem;
+            color: var(--accent);
+        }
+
+        .contact-info {
+            font-size: 0.95rem;
+            color: #607f91;
+            margin-bottom: 12px;
+        }
+
+        .contact-info .equal-note {
+            margin-right: 16px;
+        }
+
+        .hero-panel {
+            background: var(--panel);
+            border: 1px solid var(--panel-border);
+            border-radius: 20px;
+            padding: 24px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 14px 30px rgba(40, 102, 136, 0.12);
+        }
+
+        .hero-panel h2 {
+            font-size: 1.05rem;
+            margin-bottom: 12px;
+            color: #24516a;
+            letter-spacing: 0.03em;
+            text-transform: uppercase;
+        }
+
+        .hero-panel p {
+            color: var(--text-dim);
+            font-size: 0.95rem;
+        }
+
+        .tag-grid {
+            margin-top: 16px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .tag {
+            font-size: 0.78rem;
+            padding: 6px 10px;
+            border-radius: 8px;
+            border: 1px solid rgba(49, 114, 145, 0.16);
+            background: rgba(255, 255, 255, 0.8);
+            color: #3c6378;
+        }
+
+        .section {
+            width: min(1180px, calc(100% - 40px));
+            margin: 0 auto;
+            padding: 70px 0;
+        }
+
+        .section-head {
+            margin-bottom: 22px;
+            text-align: center;
+        }
+
+        .section-title {
+            font-size: clamp(1.6rem, 3vw, 2.4rem);
+            margin-bottom: 6px;
+        }
+
+        .section-sub {
+            color: var(--text-dim);
+        }
+
+        .overview-card {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.96), rgba(242, 249, 254, 0.94));
+            border: 1px solid rgba(27, 109, 148, 0.16);
+            border-radius: 20px;
+            padding: 26px;
+            color: #456378;
+        }
+
+        .overview-card strong {
+            color: #17364a;
+        }
+
+        .frame-wrap {
+            margin-top: 24px;
+            border-radius: 18px;
+            overflow: hidden;
+            border: 1px solid rgba(27, 109, 148, 0.14);
+            background: rgba(255, 255, 255, 0.88);
+            box-shadow: 0 12px 26px rgba(36, 100, 133, 0.12);
+        }
+
+        .frame-wrap iframe {
+            width: 100%;
+            border: none;
+            display: block;
+        }
+
+        .method-frame {
+            min-height: 680px;
+            height: auto;
+        }
+
+        #method .frame-wrap {
+            margin-top: 24px;
+            border: none;
+            border-radius: 0;
+            background: transparent;
+            box-shadow: none;
+            overflow: visible;
+        }
+
+        #method .frame-wrap iframe {
+            display: block;
+        }
+
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 18px;
+            margin-top: 24px;
+        }
+
+        .video-carousel {
+            margin-top: 16px;
+            padding: 0;
+        }
+
+        .carousel-viewport {
+            overflow: visible;
+            border-radius: 10px;
+            position: relative;
+            min-height: 0;
+        }
+
+        .carousel-track {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 18px;
+        }
+
+        .results-group {
+            margin-top: 32px;
+        }
+
+        .results-group:first-of-type {
+            margin-top: 0;
+        }
+
+        .results-group-title {
+            font-size: clamp(1.15rem, 2.1vw, 1.6rem);
+            text-align: center;
+            color: #1c4a63;
+            margin-bottom: 6px;
+        }
+
+        .results-group-note {
+            text-align: center;
+            color: #4f6f82;
+            font-size: 0.98rem;
+            margin-top: -2px;
+            margin-bottom: 10px;
+        }
+
+        .card {
+            background: linear-gradient(155deg, rgba(255, 255, 255, 0.94), rgba(243, 250, 254, 0.95));
+            border: 1px solid rgba(27, 109, 148, 0.12);
+            border-radius: 10px;
+            overflow: hidden;
+            transition: border-color 0.25s ease, box-shadow 0.25s ease;
+            position: static;
+            width: 100%;
+            opacity: 1;
+            pointer-events: auto;
+            box-shadow: 0 10px 22px rgba(36, 100, 133, 0.14);
+        }
+
+        .card:hover {
+            border-color: rgba(27, 109, 148, 0.24);
+            box-shadow: 0 14px 24px rgba(36, 100, 133, 0.18);
+        }
+
+        .card video {
+            width: 100%;
+            aspect-ratio: 16/9;
+            background: #f1f8fc;
+        }
+
+        .card-body {
+            padding: 8px 10px 10px;
+        }
+
+        .card h3 {
+            font-size: 0.98rem;
+            margin-bottom: 0;
+            text-align: center;
+        }
+
+        .card p {
+            color: var(--text-dim);
+            font-size: 0.84rem;
+        }
+
+        .feature-video {
+            margin-top: 18px;
+            background: linear-gradient(155deg, rgba(255, 255, 255, 0.94), rgba(243, 250, 254, 0.95));
+            border: 1px solid rgba(27, 109, 148, 0.12);
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 8px 18px rgba(36, 100, 133, 0.1);
+        }
+
+        .feature-video video {
+            width: 100%;
+            aspect-ratio: 16/9;
+            display: block;
+            background: #f1f8fc;
+        }
+
+        .feature-body {
+            padding: 9px 10px 11px;
+        }
+
+        .feature-body h3 {
+            font-size: 1.08rem;
+            margin-bottom: 4px;
+        }
+
+        .feature-body p {
+            color: var(--text-dim);
+            font-size: 0.92rem;
+        }
+
+        .footer {
+            width: min(1180px, calc(100% - 40px));
+            margin: 8px auto 30px;
+            padding-top: 12px;
+            border-top: 1px solid rgba(122, 213, 255, 0.22);
+            color: #648495;
+            font-size: 0.9rem;
+        }
+
+        .bibtex-card {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.96), rgba(242, 249, 254, 0.94));
+            border: 1px solid rgba(27, 109, 148, 0.16);
+            border-radius: 14px;
+            padding: 18px;
+        }
+
+        .bibtex-card pre {
+            margin-top: 10px;
+            padding: 12px;
+            border-radius: 10px;
+            background: rgba(22, 49, 66, 0.06);
+            border: 1px solid rgba(27, 109, 148, 0.14);
+            color: #21465e;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            overflow-x: auto;
+        }
+
+        @keyframes heroReveal {
+            from {
+                opacity: 0;
+                transform: translateY(16px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes videoDim {
+            from {
+                opacity: 1;
+            }
+            to {
+                opacity: 0.3;
+            }
+        }
+
+        @keyframes overlayIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .hero-main {
+                opacity: 1;
+                transform: none;
+                animation: none;
+            }
+
+            .hero-bg video {
+                animation: none;
+                opacity: 0.3;
+            }
+
+            .hero-overlay {
+                animation: none;
+                opacity: 1;
+            }
+        }
+
+        @media (max-width: 1080px) {
+            .method-frame {
+                min-height: 720px;
+            }
+
+            .title-line-fixed {
+                white-space: normal;
+            }
+        }
+
+        @media (max-width: 720px) {
+            .hero {
+                padding-top: 90px;
+            }
+
+            .carousel-track {
+                grid-template-columns: 1fr;
+            }
+
+            .method-frame {
+                min-height: 620px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <section class="hero">
+        <div class="hero-bg">
+            <video autoplay muted loop playsinline preload="auto">
+                <source src="videos/bg/bg.mp4" type="video/mp4">
+            </video>
+        </div>
+        <div class="hero-overlay"></div>
+
+        <div class="hero-inner">
+            <div class="hero-main">
+                <h1><span class="title-line-fixed"><span class="brand-word">OmniTrack</span>: General Motion Tracking</span><br>via Physics-Consistent Reference</h1>
+                <div class="authors-section">
+                    <div class="authors-row">
+                        <span class="author-name">Yuhan Li<sup>1,2,3<span class="equal-contrib">*</span></sup></span>
+                        <span class="author-name">Peiyuan Zhi<sup>1,2,3<span class="equal-contrib">*</span></sup></span>
+                        <span class="author-name">Yunshen Wang<sup>1,2,3</sup></span>
+                        <span class="author-name">Tengyu Liu<sup>1,2,3</sup></span>
+                        <span class="author-name">Sixu Yan<sup>1,2,3</sup></span>
+                        <span class="author-name">Wenyu Liu<sup>1,2,3</sup></span>
+                    </div>
+                    <div class="authors-row">
+                        <span class="author-name">Xinggang Wang<sup>1,2,3</sup>✉</span>
+                        <span class="author-name">Baoxiong Jia<sup>1,2,3</sup>✉</span>
+                        <span class="author-name">Siyuan Huang<sup>1,2,3</sup>✉</span>
+                    </div>
+                </div>
+
+                <div class="affiliations-section">
+                    <div class="affiliation-row">
+                        <span class="affiliation"><sup>1</sup> Beijing Institute for General Artificial Intelligence (BIGAI)</span>
+                    </div>
+                    <div class="affiliation-row">
+                        <span class="affiliation"><sup>2</sup> Huazhong University of Science and Technology</span>
+                        <span class="affiliation"><sup>3</sup> State Key Lab of General AI</span>
+                    </div>
+                </div>
+
+                <div class="contact-info">
+                    <span class="equal-note">* Equal contribution</span>
+                    <span>✉ syhuang@bigai.ai</span>
+                </div>
+
+                <div class="action-row">
+                    <a class="btn btn-ghost" href="https://omnitrack-humanoid.github.io/">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                        Paper
+                    </a>
+                    <a class="btn btn-ghost" href="https://github.com/OmniTrack-Humanoid/OmniTrack">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+                        Code
+                    </a>
+                    <a class="btn btn-ghost" href="https://omnitrack-humanoid.github.io/">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></svg>
+                        Dataset
+                    </a>
+                    <a class="btn btn-ghost" href="https://omnitrack-humanoid.github.io/">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                        Video
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section" id="overview">
+        <div class="section-head">
+            <h2 class="section-title">Abstract</h2>
+        </div>
+        <div class="overview-card">
+            <p>
+                Learning motion tracking from rich human motion data is a foundational task for achieving general control in humanoid robots, enabling them to perform diverse behaviors. However, discrepancies in morphology and dynamics between humans and robots, combined with data noise, introduce physically infeasible artifacts in reference motions, such as floating and penetration. During both training and execution, these artifacts create a conflict between following inaccurate reference motions and maintaining the robot's stability, hindering the development of a generalizable motion tracking policy.
+                To address these challenges, we introduce <span class="brand-inline">OmniTrack</span>, a general tracking framework that explicitly decouples physical feasibility from general motion tracking. In the first stage, a privileged generalist policy generates physically plausible motions that strictly adhere to the robot's dynamics via trajectory rollout in simulation. In the second stage, the general control policy is trained to track these physically feasible motions, ensuring stable and coherent control transfer to the real robot. Experiments show that <span class="brand-inline">OmniTrack</span> improves tracking accuracy and demonstrates strong generalization to unseen motions. In real-world tests, <span class="brand-inline">OmniTrack</span> achieves hour-long, consistent, and stable tracking, including complex acrobatic motions such as flips and cartwheels. Additionally, we show that <span class="brand-inline">OmniTrack</span> supports human-style stable and dynamic online teleoperation, highlighting its robustness and adaptability to varying user inputs.
+            </p>
+        </div>
+    </section>
+
+    <section class="section" id="method">
+        <div class="section-head">
+            <h2 class="section-title">OmniTrack Framework</h2>
+        </div>
+        <div class="frame-wrap method-frame" id="method-wrapper">
+            <iframe id="method-iframe" src="method.html?v=20260212" title="Method" loading="lazy" scrolling="no"></iframe>
+        </div>
+    </section>
+
+    <section class="section" id="results">
+        <div class="section-head">
+            <h2 class="section-title">Result Demonstrations</h2>
+        </div>
+
+        <div class="results-group">
+            <h3 class="results-group-title">Online Teleoperation</h3>
+            <div class="video-carousel">
+                <div class="carousel-viewport">
+                    <div class="carousel-track">
+                        <article class="card">
+                            <video autoplay controls loop muted playsinline preload="metadata">
+                                <source src="videos/results/online_teleoperation/teleop_spin_jump.mp4" type="video/mp4">
+                            </video>
+                            <div class="card-body">
+                                <h3>Spinning Jump</h3>
+                            </div>
+                        </article>
+                        <article class="card">
+                            <video autoplay controls loop muted playsinline preload="metadata">
+                                <source src="videos/results/online_teleoperation/teleop_jump_kick.mp4" type="video/mp4">
+                            </video>
+                            <div class="card-body">
+                                <h3>Jumping Kick</h3>
+                            </div>
+                        </article>
+                        <article class="card">
+                            <video autoplay controls loop muted playsinline preload="metadata">
+                                <source src="videos/results/online_teleoperation/teleop_high_leap.mp4" type="video/mp4">
+                            </video>
+                            <div class="card-body">
+                                <h3>High Leap</h3>
+                            </div>
+                        </article>
+                        <article class="card">
+                            <video autoplay controls loop muted playsinline preload="metadata">
+                                <source src="videos/results/online_teleoperation/teleop_kneel_sit.mp4" type="video/mp4">
+                            </video>
+                            <div class="card-body">
+                                <h3>Kneel and Sit</h3>
+                            </div>
+                        </article>
+                        <article class="card">
+                            <video autoplay controls loop muted playsinline preload="metadata">
+                                <source src="videos/results/online_teleoperation/teleop_spin.mp4" type="video/mp4">
+                            </video>
+                            <div class="card-body">
+                                <h3>Spin</h3>
+                            </div>
+                        </article>
+                        <article class="card">
+                            <video autoplay controls loop muted playsinline preload="metadata">
+                                <source src="videos/results/online_teleoperation/teleop_walk.mp4" type="video/mp4">
+                            </video>
+                            <div class="card-body">
+                                <h3>Walk and Run</h3>
+                            </div>
+                        </article>
+                        <article class="card">
+                            <video autoplay controls loop muted playsinline preload="metadata">
+                                <source src="videos/results/online_teleoperation/teleop_run.mp4" type="video/mp4">
+                            </video>
+                            <div class="card-body">
+                                <h3>Walk and Run</h3>
+                            </div>
+                        </article>
+                        <article class="card">
+                            <video autoplay controls loop muted playsinline preload="metadata">
+                                <source src="videos/results/online_teleoperation/teleop_sway.mp4" type="video/mp4">
+                            </video>
+                            <div class="card-body">
+                                <h3>Sway and Bend</h3>
+                            </div>
+                        </article>
+                        <article class="card">
+                            <video autoplay controls loop muted playsinline preload="metadata">
+                                <source src="videos/results/online_teleoperation/teleop_bend.mp4" type="video/mp4">
+                            </video>
+                            <div class="card-body">
+                                <h3>Sway and Bend</h3>
+                            </div>
+                        </article>
+                        <article class="card">
+                            <video autoplay controls loop muted playsinline preload="metadata">
+                                <source src="videos/results/online_teleoperation/teleop_boxing.mp4" type="video/mp4">
+                            </video>
+                            <div class="card-body">
+                                <h3>Boxing</h3>
+                            </div>
+                        </article>
+                        <article class="card">
+                            <video autoplay controls loop muted playsinline preload="metadata">
+                                <source src="videos/results/online_teleoperation/teleop_pico_kneel.mp4" type="video/mp4">
+                            </video>
+                            <div class="card-body">
+                                <h3>Kneel</h3>
+                            </div>
+                        </article>
+                        <article class="card">
+                            <video autoplay controls loop muted playsinline preload="metadata">
+                                <source src="videos/results/online_teleoperation/teleop_pico_sway.mp4" type="video/mp4">
+                            </video>
+                            <div class="card-body">
+                                <h3>Sway and Bend</h3>
+                            </div>
+                        </article>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="results-group">
+            <h3 class="results-group-title">Diverse Motion Tracking</h3>
+            <article class="feature-video">
+                <video autoplay controls loop muted playsinline preload="metadata">
+                    <source src="videos/results/motion_tracking/diverse_motions.mp4" type="video/mp4">
+                </video>
+                <div class="feature-body">
+                    <h3>Diverse Motion Tracking</h3>
+                    <p>Unified motion-tracking showcase.</p>
+                </div>
+            </article>
+        </div>
+
+        <div class="results-group">
+            <h3 class="results-group-title">Consecutive Side Flips</h3>
+            <article class="feature-video">
+                <video autoplay controls loop muted playsinline preload="metadata">
+                    <source src="videos/results/side_flips_17.mp4" type="video/mp4">
+                </video>
+                <div class="feature-body">
+                    <h3>17 Consecutive Side Flips</h3>
+                    <p>Continuous side-flip sequence with 17 repetitions.</p>
+                </div>
+            </article>
+        </div>
+
+        <div class="results-group">
+            <h3 class="results-group-title">One-hour Tracking</h3>
+            <article class="feature-video">
+                <video autoplay controls loop muted playsinline preload="metadata">
+                    <source src="videos/results/one_hour_tracking/hourlong.mp4" type="video/mp4">
+                </video>
+                <div class="feature-body">
+                    <h3>Long-Horizon Tracking</h3>
+                    <p>Continuous 1-hour demo.</p>
+                </div>
+            </article>
+        </div>
+    </section>
+
+    <section class="section" id="bibtex">
+        <div class="section-head">
+            <h2 class="section-title">BibTeX</h2>
+        </div>
+        <div class="bibtex-card">
+            <pre><code>@article{omnitrack2026,
+  title   = {OmniTrack: General Motion Tracking via Physics-Consistent Reference},
+  author  = {Yuhan, Li and et al.},
+  journal = {arXiv preprint arXiv:XXXX.XXXXX},
+  year    = {2026}
+}</code></pre>
+        </div>
+    </section>
+
+    <div class="footer">
+        © Page template from
+        <a href="https://jnnan.github.io/uniact/" target="_blank" rel="noopener noreferrer">UniAct</a>.
+    </div>
+
+    <script>
+        const iframe = document.getElementById("method-iframe");
+        const wrapper = document.getElementById("method-wrapper");
+
+        if ("scrollRestoration" in history) {
+            history.scrollRestoration = "manual";
+        }
+
+        window.addEventListener("load", () => {
+            window.scrollTo(0, 0);
+        });
+
+        function resizeIframe() {
+            try {
+                const innerDoc = iframe.contentDocument || iframe.contentWindow.document;
+                if (innerDoc && innerDoc.body && innerDoc.documentElement) {
+                    const h = Math.max(
+                        innerDoc.body.scrollHeight,
+                        innerDoc.documentElement.scrollHeight
+                    );
+                    if (h > 500) {
+                        const target = h + 2;
+                        wrapper.style.height = target + "px";
+                        iframe.style.height = target + "px";
+                    }
+                }
+            } catch (e) {
+                console.log("iframe auto-resize fallback");
+            }
+        }
+
+        window.addEventListener("message", (event) => {
+            const data = event.data;
+            if (!data || data.type !== "method-height") return;
+            const h = Number(data.height);
+            if (!Number.isFinite(h) || h < 300) return;
+            const target = Math.ceil(h) + 2;
+            wrapper.style.height = target + "px";
+            iframe.style.height = target + "px";
+        });
+
+        iframe.onload = resizeIframe;
+        window.addEventListener("resize", resizeIframe);
+        setTimeout(resizeIframe, 300);
+        setTimeout(resizeIframe, 1000);
+
+    </script>
+</body>
+</html>
