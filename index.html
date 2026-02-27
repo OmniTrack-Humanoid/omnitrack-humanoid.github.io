@@ -202,12 +202,14 @@
         }
 
         .author-name {
-            font-size: 1.08rem;
+            font-size: 1.30rem;
+            font-weight: 600;
             color: #2f5368;
         }
 
         .author-name sup {
-            font-size: 0.6rem;
+            font-size: 0.78rem;
+            font-weight: 600;
             color: var(--accent);
         }
 
@@ -232,17 +234,20 @@
         }
 
         .affiliation {
-            font-size: 0.9rem;
+            font-size: 1.08rem;
+            font-weight: 500;
             color: #5b778a;
         }
 
         .affiliation sup {
-            font-size: 0.56rem;
+            font-size: 0.72rem;
+            font-weight: 600;
             color: var(--accent);
         }
 
         .contact-info {
-            font-size: 0.95rem;
+            font-size: 1.06rem;
+            font-weight: 500;
             color: #607f91;
             margin-bottom: 12px;
         }
@@ -394,6 +399,10 @@
             margin-bottom: 6px;
         }
 
+        .results-group-title.more-results-title {
+            margin-top: 32px;
+        }
+
         .results-group-note {
             text-align: center;
             color: #4f6f82;
@@ -471,6 +480,113 @@
             font-size: 0.92rem;
         }
 
+        .motion-album {
+            position: relative;
+            margin-top: 60px;
+            padding: 0 40px;
+        }
+
+        .motion-album-viewport {
+            position: relative;
+            min-height: 620px;
+            overflow: visible;
+        }
+
+        .motion-album-track {
+            position: relative;
+            height: 620px;
+        }
+
+        .motion-album-card {
+            position: absolute;
+            left: 50%;
+            top: 0;
+            width: min(920px, 92vw);
+            transform-origin: center center;
+            opacity: 0;
+            pointer-events: none;
+            transition: transform 0.65s cubic-bezier(0.2, 0.7, 0.2, 1), opacity 0.65s ease, filter 0.65s ease, box-shadow 0.65s ease;
+        }
+
+        .motion-album-card.is-active {
+            transform: translateX(-50%) scale(1.03);
+            opacity: 1;
+            z-index: 4;
+            pointer-events: auto;
+            filter: brightness(1) saturate(1.04);
+            box-shadow: 0 26px 48px rgba(17, 45, 66, 0.32);
+        }
+
+        .motion-album-card.is-prev {
+            transform: translateX(-82%) scale(0.8);
+            opacity: 0.55;
+            z-index: 3;
+            filter: brightness(0.78) saturate(0.82);
+        }
+
+        .motion-album-card.is-next {
+            transform: translateX(-18%) scale(0.8);
+            opacity: 0.55;
+            z-index: 3;
+            filter: brightness(0.78) saturate(0.82);
+        }
+
+        .motion-album-card.is-prev2 {
+            transform: translateX(-98%) scale(0.7);
+            opacity: 0.24;
+            z-index: 2;
+            filter: brightness(0.58) saturate(0.75) blur(0.6px);
+        }
+
+        .motion-album-card.is-next2 {
+            transform: translateX(-2%) scale(0.7);
+            opacity: 0.24;
+            z-index: 2;
+            filter: brightness(0.58) saturate(0.75) blur(0.6px);
+        }
+
+        .motion-album-card.is-hidden {
+            transform: translateX(-50%) scale(0.78);
+            opacity: 0;
+            z-index: 1;
+            filter: brightness(0.5);
+        }
+
+        .motion-album-btn {
+            position: absolute;
+            top: 42%;
+            transform: translateY(-50%);
+            width: 44px;
+            height: 44px;
+            border: 1px solid rgba(27, 109, 148, 0.36);
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.98);
+            color: #1f4a63;
+            font-size: 1.35rem;
+            font-weight: 700;
+            line-height: 1;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 12px 22px rgba(20, 60, 86, 0.24);
+            z-index: 6;
+        }
+
+        .motion-album-btn:hover {
+            background: #1f89cd;
+            color: #fff;
+            border-color: #1f89cd;
+        }
+
+        .motion-album-btn.prev {
+            left: calc(50% - min(920px, 92vw) / 2 - 54px);
+        }
+
+        .motion-album-btn.next {
+            right: calc(50% - min(920px, 92vw) / 2 - 54px);
+        }
+
         .footer {
             width: min(1180px, calc(100% - 40px));
             margin: 8px auto 30px;
@@ -515,7 +631,7 @@
                 opacity: 1;
             }
             to {
-                opacity: 0.3;
+                opacity: 0.8;
             }
         }
 
@@ -565,6 +681,41 @@
                 grid-template-columns: 1fr;
             }
 
+            .motion-album {
+                padding: 0 34px;
+            }
+
+            .motion-album-viewport {
+                min-height: 460px;
+            }
+
+            .motion-album-track {
+                height: 460px;
+            }
+
+            .motion-album-card.is-prev {
+                transform: translateX(-82%) scale(0.82);
+            }
+
+            .motion-album-card.is-next {
+                transform: translateX(-18%) scale(0.82);
+            }
+
+            .motion-album-btn {
+                width: 34px;
+                height: 34px;
+                font-size: 1.1rem;
+                top: 44%;
+            }
+
+            .motion-album-btn.prev {
+                left: 2px;
+            }
+
+            .motion-album-btn.next {
+                right: 2px;
+            }
+
             .method-frame {
                 min-height: 620px;
             }
@@ -585,27 +736,29 @@
                 <h1><span class="title-line-fixed"><span class="brand-word">OmniTrack</span>: General Motion Tracking</span><br>via Physics-Consistent Reference</h1>
                 <div class="authors-section">
                     <div class="authors-row">
-                        <span class="author-name">Yuhan Li<sup>1,2,3<span class="equal-contrib">*</span></sup></span>
-                        <span class="author-name">Peiyuan Zhi<sup>1,2,3<span class="equal-contrib">*</span></sup></span>
-                        <span class="author-name">Yunshen Wang<sup>1,2,3</sup></span>
-                        <span class="author-name">Tengyu Liu<sup>1,2,3</sup></span>
-                        <span class="author-name">Sixu Yan<sup>1,2,3</sup></span>
-                        <span class="author-name">Wenyu Liu<sup>1,2,3</sup></span>
+                        <span class="author-name">Yuhan Li<sup>1,2<span class="equal-contrib">*</span></sup></span>
+                        <span class="author-name">Peiyuan Zhi<sup>2<span class="equal-contrib">*</span></sup></span>
+                        <span class="author-name">Yunshen Wang<sup>2,3</sup></span>
+                        <span class="author-name">Tengyu Liu<sup>2</sup></span>
+                        <span class="author-name">Sixu Yan<sup>1,2</sup></span>
+                        <span class="author-name">Wenyu Liu<sup>1</sup></span>
                     </div>
                     <div class="authors-row">
-                        <span class="author-name">Xinggang Wang<sup>1,2,3</sup>✉</span>
-                        <span class="author-name">Baoxiong Jia<sup>1,2,3</sup>✉</span>
-                        <span class="author-name">Siyuan Huang<sup>1,2,3</sup>✉</span>
+                        <span class="author-name">Xinggang Wang<sup>1</sup>✉</span>
+                        <span class="author-name">Baoxiong Jia<sup>2</sup>✉</span>
+                        <span class="author-name">Siyuan Huang<sup>2</sup>✉</span>
                     </div>
                 </div>
 
                 <div class="affiliations-section">
                     <div class="affiliation-row">
-                        <span class="affiliation"><sup>1</sup> Beijing Institute for General Artificial Intelligence (BIGAI)</span>
+                        <span class="affiliation"><sup>1</sup> Huazhong University of Science and Technology</span>
                     </div>
                     <div class="affiliation-row">
-                        <span class="affiliation"><sup>2</sup> Huazhong University of Science and Technology</span>
-                        <span class="affiliation"><sup>3</sup> State Key Lab of General AI</span>
+                        <span class="affiliation"><sup>2</sup> State Key Lab of General AI, Beijing Institute for General Artificial Intelligence (BIGAI)</span>
+                    </div>
+                    <div class="affiliation-row">
+                        <span class="affiliation"><sup>3</sup> Shanghai Jiao Tong University</span>
                     </div>
                 </div>
 
@@ -619,6 +772,14 @@
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
                         Paper
                     </a>
+                    <a class="btn btn-ghost" href="https://omnitrack-humanoid.github.io/">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                        Video
+                    </a>
+                    <a class="btn btn-ghost" href="https://youtu.be/pqz2HnPF8M8">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                        1-Hour Track Video
+                    </a>
                     <a class="btn btn-ghost" href="https://github.com/OmniTrack-Humanoid/OmniTrack">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
                         Code
@@ -626,10 +787,6 @@
                     <a class="btn btn-ghost" href="https://omnitrack-humanoid.github.io/">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></svg>
                         Dataset
-                    </a>
-                    <a class="btn btn-ghost" href="https://omnitrack-humanoid.github.io/">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-                        Video
                     </a>
                 </div>
             </div>
@@ -769,14 +926,14 @@
         </div>
 
         <div class="results-group">
-            <h3 class="results-group-title">Diverse Motion Tracking</h3>
+            <h3 class="results-group-title">One-hour Tracking</h3>
             <article class="feature-video">
                 <video autoplay controls loop muted playsinline preload="metadata">
-                    <source src="videos/results/motion_tracking/diverse_motions.mp4" type="video/mp4">
+                    <source src="videos/results/one_hour_tracking/hourlong.mp4" type="video/mp4">
                 </video>
                 <div class="feature-body">
-                    <h3>Diverse Motion Tracking</h3>
-                    <p>Unified motion-tracking showcase.</p>
+                    <h3>Long-Horizon Tracking</h3>
+                    <p>Continuous 1-hour demo.</p>
                 </div>
             </article>
         </div>
@@ -795,16 +952,161 @@
         </div>
 
         <div class="results-group">
-            <h3 class="results-group-title">One-hour Tracking</h3>
+            <h3 class="results-group-title">Diverse Motion Tracking</h3>
             <article class="feature-video">
                 <video autoplay controls loop muted playsinline preload="metadata">
-                    <source src="videos/results/one_hour_tracking/hourlong.mp4" type="video/mp4">
+                    <source src="videos/results/motion_tracking/diverse_motions.mp4" type="video/mp4">
                 </video>
                 <div class="feature-body">
-                    <h3>Long-Horizon Tracking</h3>
-                    <p>Continuous 1-hour demo.</p>
+                    <h3>Diverse Motion Tracking with One Policy</h3>
+                    <p>All motions shown here are executed by a single unified policy.</p>
                 </div>
             </article>
+            <h3 class="results-group-title more-results-title">More Results</h3>
+            <p class="results-group-note">All motion results are generated by the same unified policy.</p>
+            <div class="motion-album" data-motion-album>
+                <button class="motion-album-btn prev" type="button" aria-label="Previous motion video">&#10094;</button>
+                <div class="motion-album-viewport" aria-label="Diverse motion tracking album">
+                    <div class="motion-album-track">
+                        <article class="card motion-album-card">
+                            <video controls loop muted playsinline preload="none">
+                                <source data-src="videos/results/motion_tracking/web_final/DJI_20251105160757_0061_D.MP4" type="video/mp4">
+                            </video>
+                        </article>
+                        <article class="card motion-album-card">
+                            <video controls loop muted playsinline preload="none">
+                                <source data-src="videos/results/motion_tracking/web_final/DJI_20251105161502_0064_D.MP4" type="video/mp4">
+                            </video>
+                        </article>
+                        <article class="card motion-album-card">
+                            <video controls loop muted playsinline preload="none">
+                                <source data-src="videos/results/motion_tracking/web_final/DJI_20251105161836_0065_D.MP4" type="video/mp4">
+                            </video>
+                        </article>
+                        <article class="card motion-album-card">
+                            <video controls loop muted playsinline preload="none">
+                                <source data-src="videos/results/motion_tracking/web_final/DJI_20251105163314_0068_D.MP4" type="video/mp4">
+                            </video>
+                        </article>
+                        <article class="card motion-album-card">
+                            <video controls loop muted playsinline preload="none">
+                                <source data-src="videos/results/motion_tracking/web_final/DJI_20251105163752_0072_D.MP4" type="video/mp4">
+                            </video>
+                        </article>
+                        <article class="card motion-album-card">
+                            <video controls loop muted playsinline preload="none">
+                                <source data-src="videos/results/motion_tracking/web_final/DJI_20251105164301_0073_D.MP4" type="video/mp4">
+                            </video>
+                        </article>
+                        <article class="card motion-album-card">
+                            <video controls loop muted playsinline preload="none">
+                                <source data-src="videos/results/motion_tracking/web_final/DJI_20251105165825_0076_D.MP4" type="video/mp4">
+                            </video>
+                        </article>
+                        <article class="card motion-album-card">
+                            <video controls loop muted playsinline preload="none">
+                                <source data-src="videos/results/motion_tracking/web_final/DJI_20251105171144_0082_D.MP4" type="video/mp4">
+                            </video>
+                        </article>
+                        <article class="card motion-album-card">
+                            <video controls loop muted playsinline preload="none">
+                                <source data-src="videos/results/motion_tracking/web_final/DJI_20251105173011_0084_D.MP4" type="video/mp4">
+                            </video>
+                        </article>
+                        <article class="card motion-album-card">
+                            <video controls loop muted playsinline preload="none">
+                                <source data-src="videos/results/motion_tracking/web_final/DJI_20251105204501_0088_D.MP4" type="video/mp4">
+                            </video>
+                        </article>
+                        <article class="card motion-album-card">
+                            <video controls loop muted playsinline preload="none">
+                                <source data-src="videos/results/motion_tracking/web_final/DJI_20251105204920_0089_D.MP4" type="video/mp4">
+                            </video>
+                        </article>
+                        <article class="card motion-album-card">
+                            <video controls loop muted playsinline preload="none">
+                                <source data-src="videos/results/motion_tracking/web_final/DJI_20251105205501_0090_D.MP4" type="video/mp4">
+                            </video>
+                        </article>
+                        <article class="card motion-album-card">
+                            <video controls loop muted playsinline preload="none">
+                                <source data-src="videos/results/motion_tracking/web_final/DJI_20251106165118_0093_D.MP4" type="video/mp4">
+                            </video>
+                        </article>
+                        <article class="card motion-album-card">
+                            <video controls loop muted playsinline preload="none">
+                                <source data-src="videos/results/motion_tracking/web_final/DJI_20251106170128_0097_D.MP4" type="video/mp4">
+                            </video>
+                        </article>
+                        <article class="card motion-album-card">
+                            <video controls loop muted playsinline preload="none">
+                                <source data-src="videos/results/motion_tracking/web_final/DJI_20251106170603_0098_D.MP4" type="video/mp4">
+                            </video>
+                        </article>
+                        <article class="card motion-album-card">
+                            <video controls loop muted playsinline preload="none">
+                                <source data-src="videos/results/motion_tracking/web_final/DJI_20251106171547_0099_D.MP4" type="video/mp4">
+                            </video>
+                        </article>
+                        <article class="card motion-album-card">
+                            <video controls loop muted playsinline preload="none">
+                                <source data-src="videos/results/motion_tracking/web_final/DJI_20251106172726_0103_D.MP4" type="video/mp4">
+                            </video>
+                        </article>
+                        <article class="card motion-album-card">
+                            <video controls loop muted playsinline preload="none">
+                                <source data-src="videos/results/motion_tracking/web_final/DJI_20251106173409_0104_D.MP4" type="video/mp4">
+                            </video>
+                        </article>
+                        <article class="card motion-album-card">
+                            <video controls loop muted playsinline preload="none">
+                                <source data-src="videos/results/motion_tracking/web_final/DJI_20251106180605_0105_D.MP4" type="video/mp4">
+                            </video>
+                        </article>
+                        <article class="card motion-album-card">
+                            <video controls loop muted playsinline preload="none">
+                                <source data-src="videos/results/motion_tracking/web_final/DJI_20251106181512_0107_D.MP4" type="video/mp4">
+                            </video>
+                        </article>
+                        <article class="card motion-album-card">
+                            <video controls loop muted playsinline preload="none">
+                                <source data-src="videos/results/motion_tracking/web_final/DJI_20251106182747_0111_D.MP4" type="video/mp4">
+                            </video>
+                        </article>
+                        <article class="card motion-album-card">
+                            <video controls loop muted playsinline preload="none">
+                                <source data-src="videos/results/motion_tracking/web_final/DJI_20251106183403_0112_D.MP4" type="video/mp4">
+                            </video>
+                        </article>
+                        <article class="card motion-album-card">
+                            <video controls loop muted playsinline preload="none">
+                                <source data-src="videos/results/motion_tracking/web_final/DJI_20251106185323_0114_D.MP4" type="video/mp4">
+                            </video>
+                        </article>
+                        <article class="card motion-album-card">
+                            <video controls loop muted playsinline preload="none">
+                                <source data-src="videos/results/motion_tracking/web_final/DJI_20251106190307_0116_D.MP4" type="video/mp4">
+                            </video>
+                        </article>
+                        <article class="card motion-album-card">
+                            <video controls loop muted playsinline preload="none">
+                                <source data-src="videos/results/motion_tracking/web_final/DJI_20251106190824_0119_D.MP4" type="video/mp4">
+                            </video>
+                        </article>
+                        <article class="card motion-album-card">
+                            <video controls loop muted playsinline preload="none">
+                                <source data-src="videos/results/motion_tracking/web_final/DJI_20251106191926_0120_D.MP4" type="video/mp4">
+                            </video>
+                        </article>
+                        <article class="card motion-album-card">
+                            <video controls loop muted playsinline preload="none">
+                                <source data-src="videos/results/motion_tracking/web_final/DJI_20251106192431_0121_D.MP4" type="video/mp4">
+                            </video>
+                        </article>
+                    </div>
+                </div>
+                <button class="motion-album-btn next" type="button" aria-label="Next motion video">&#10095;</button>
+            </div>
         </div>
     </section>
 
@@ -872,6 +1174,92 @@
         window.addEventListener("resize", resizeIframe);
         setTimeout(resizeIframe, 300);
         setTimeout(resizeIframe, 1000);
+
+        function initMotionAlbums() {
+            const albums = Array.from(document.querySelectorAll("[data-motion-album]"));
+            albums.forEach((album) => {
+                const track = album.querySelector(".motion-album-track");
+                const prevBtn = album.querySelector(".motion-album-btn.prev");
+                const nextBtn = album.querySelector(".motion-album-btn.next");
+                if (!track || !prevBtn || !nextBtn) return;
+                const cards = Array.from(track.querySelectorAll(".motion-album-card"));
+                if (cards.length === 0) return;
+
+                let current = 0;
+                let timerId = null;
+
+                const update = () => {
+                    const n = cards.length;
+                    cards.forEach((card, idx) => {
+                        card.classList.remove("is-active", "is-prev", "is-next", "is-prev2", "is-next2", "is-hidden");
+                        let diff = idx - current;
+                        if (diff > n / 2) diff -= n;
+                        if (diff < -n / 2) diff += n;
+                        card.dataset.diff = String(diff);
+
+                        if (diff === 0) card.classList.add("is-active");
+                        else if (diff === -1) card.classList.add("is-prev");
+                        else if (diff === 1) card.classList.add("is-next");
+                        else if (diff === -2) card.classList.add("is-prev2");
+                        else if (diff === 2) card.classList.add("is-next2");
+                        else card.classList.add("is-hidden");
+                    });
+
+                    // Load only active/neighbor videos to reduce initial bandwidth.
+                    cards.forEach((card) => {
+                        const diff = Math.abs(Number(card.dataset.diff || "99"));
+                        const video = card.querySelector("video");
+                        const source = video ? video.querySelector("source") : null;
+                        if (!video || !source) return;
+
+                        if (diff <= 1 && !source.getAttribute("src")) {
+                            const dataSrc = source.getAttribute("data-src");
+                            if (dataSrc) {
+                                source.setAttribute("src", dataSrc);
+                                video.load();
+                            }
+                        }
+
+                        if (diff === 0) {
+                            video.play().catch(() => {});
+                        } else {
+                            video.pause();
+                        }
+                    });
+                };
+
+                const go = (step) => {
+                    current = (current + step + cards.length) % cards.length;
+                    update();
+                };
+
+                const startAuto = () => {
+                    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+                    if (timerId) return;
+                    timerId = setInterval(() => {
+                        go(1);
+                    }, 3200);
+                };
+
+                const stopAuto = () => {
+                    if (!timerId) return;
+                    clearInterval(timerId);
+                    timerId = null;
+                };
+
+                prevBtn.addEventListener("click", () => go(-1));
+                nextBtn.addEventListener("click", () => go(1));
+                album.addEventListener("mouseenter", stopAuto);
+                album.addEventListener("mouseleave", startAuto);
+                album.addEventListener("focusin", stopAuto);
+                album.addEventListener("focusout", startAuto);
+
+                update();
+                startAuto();
+            });
+        }
+
+        initMotionAlbums();
 
     </script>
 </body>
