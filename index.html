@@ -72,11 +72,7 @@
             position: absolute;
             inset: 0;
             z-index: -1;
-            background:
-                linear-gradient(180deg, rgba(245, 251, 255, 0.02) 0%, rgba(245, 251, 255, 0.45) 58%, rgba(238, 247, 252, 0.72) 100%);
-            opacity: 0;
-            animation: overlayIn 1.2s ease-out forwards;
-            animation-delay: var(--intro-delay);
+            display: none;
         }
 
         .hero-inner {
@@ -204,17 +200,19 @@
         .author-name {
             font-size: 1.30rem;
             font-weight: 600;
-            color: #2f5368;
+            color: #f6fbff;
+            text-shadow: 0 2px 10px rgba(10, 24, 36, 0.62);
         }
 
         .author-name sup {
             font-size: 0.78rem;
             font-weight: 600;
-            color: var(--accent);
+            color: #d7ebff;
+            text-shadow: 0 1px 6px rgba(10, 24, 36, 0.58);
         }
 
         .equal-contrib {
-            color: #e28743;
+            color: #ffc887;
         }
 
         .affiliations-section {
@@ -236,19 +234,22 @@
         .affiliation {
             font-size: 1.08rem;
             font-weight: 500;
-            color: #5b778a;
+            color: #eef7ff;
+            text-shadow: 0 2px 10px rgba(10, 24, 36, 0.62);
         }
 
         .affiliation sup {
             font-size: 0.72rem;
             font-weight: 600;
-            color: var(--accent);
+            color: #d7ebff;
+            text-shadow: 0 1px 6px rgba(10, 24, 36, 0.58);
         }
 
         .contact-info {
             font-size: 1.06rem;
             font-weight: 500;
-            color: #607f91;
+            color: #e8f4ff;
+            text-shadow: 0 2px 10px rgba(10, 24, 36, 0.62);
             margin-bottom: 12px;
         }
 
@@ -339,6 +340,18 @@
             width: 100%;
             border: none;
             display: block;
+        }
+
+        .main-video-frame {
+            margin-top: 14px;
+        }
+
+        .main-video-frame iframe {
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            height: auto;
+            display: block;
+            border: 0;
         }
 
         .method-frame {
@@ -631,7 +644,7 @@
                 opacity: 1;
             }
             to {
-                opacity: 0.8;
+                opacity: 0.92;
             }
         }
 
@@ -726,7 +739,7 @@
     <section class="hero">
         <div class="hero-bg">
             <video autoplay muted loop playsinline preload="auto">
-                <source src="videos/bg/bg.mp4" type="video/mp4">
+                <source src="videos/bg/web_bg.mp4" type="video/mp4">
             </video>
         </div>
         <div class="hero-overlay"></div>
@@ -764,15 +777,15 @@
 
                 <div class="contact-info">
                     <span class="equal-note">* Equal contribution</span>
-                    <span>✉ syhuang@bigai.ai</span>
+                    <span>✉ Corresponding authors</span>
                 </div>
 
                 <div class="action-row">
-                    <a class="btn btn-ghost" href="https://omnitrack-humanoid.github.io/">
+                    <a class="btn btn-ghost" href="https://arxiv.org/abs/2602.23832">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
                         Paper
                     </a>
-                    <a class="btn btn-ghost" href="https://omnitrack-humanoid.github.io/">
+                    <a class="btn btn-ghost" href="https://youtu.be/5u93K6YZV3g">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
                         Video
                     </a>
@@ -790,6 +803,19 @@
                     </a>
                 </div>
             </div>
+        </div>
+    </section>
+
+    <section class="section" id="main-video">
+        <div class="frame-wrap main-video-frame">
+            <iframe
+                src="https://www.youtube.com/embed/5u93K6YZV3g"
+                title="OmniTrack Main Video"
+                loading="lazy"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                referrerpolicy="strict-origin-when-cross-origin"
+                allowfullscreen>
+            </iframe>
         </div>
     </section>
 
